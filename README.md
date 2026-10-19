@@ -36,7 +36,7 @@ uses Node built-ins only. The page requests no external fonts, scripts or images
 
 ```bash
 npm run build    # regenerate dist/ from site.config.json (also builds the PNG icons)
-npm run check    # verify the built site (111 checks) — exits non-zero on any failure
+npm run check    # verify the built site (123 checks) — exits non-zero on any failure
 npm run serve    # preview at http://127.0.0.1:4173 (PORT=8080 npm run serve to change)
 npm test         # build, then check
 ```
@@ -180,6 +180,11 @@ Google), plus HTTP and TLS probes. No changes were made.
 The artefact is a plain static directory: `dist/` (16 files, ~68 KB). No server code, no
 database, no build-time secret. Nothing below has been executed.
 
+**`DEPLOYMENT.md` is the concrete plan**: it evaluates what is actually available on this
+machine, recommends GitHub Pages, lists the exact commands, the exact DNS records to add at
+DomainIndia, the HTTPS step, the rollback, and the post-deployment checks. The options below
+are the general shape of the decision it resolves.
+
 **Option A — a static host (Cloudflare Pages / Netlify / Vercel / GitHub Pages)**
 1. Point the host at this repository; build command `npm run build`, output directory `dist`
    (or upload `dist/` as-is — it is self-contained and committed).
@@ -217,8 +222,10 @@ temporarily.
    in that project (its deployment doc still uses `https://sk.example.com`), and DNS shows no
    `assistant.skcore.in`. Give me the real address and it becomes a one-line change plus
    `verifiedNote`.
-3. **Host choice (A/B/C) and DNS approval** — required before any record is created at
-   DomainIndia or the apex is pointed anywhere.
+3. **Host choice and DNS approval** — see `DEPLOYMENT.md`: it recommends GitHub Pages (a new
+   separate repository, standard apex `A` records, no DNS-provider change) and lists the exact
+   records for approval. Required before any record is created at DomainIndia or the apex is
+   pointed anywhere.
 4. **Footer links** — kept to this page only ("Products", "About"). No privacy policy, terms,
    status page or social links were invented.
 5. **Google Sign-In origin on SK AUTH** — see the note at the end of §6; it needs a change in

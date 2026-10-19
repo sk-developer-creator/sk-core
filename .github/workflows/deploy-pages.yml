@@ -1,0 +1,67 @@
+name: Deploy SK CORE to GitHub Pages
+
+# Publishes the generated dist/ directory to GitHub Pages.
+#
+# There is no dependency install step: the build and the verifier use Node
+# built-ins only (package.json has no dependencies).
+#
+# This workflow is the deployment mechanism for the site. It has been prepared
+# locally and is NOT active until the repository is pushed to GitHub and Pages
+# is switched to the "GitHub Actions" source.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; do not cancel an in-flight deployment.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and verify dist/
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build dist/
+        run: npm run build
+
+      - name: Verify the built site
+        run: npm run check
+
+      - name: Confirm dist/ was rebuilt cleanly
+        run: git diff --exit-code -- dist
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the site artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
