@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<link rel="canonical" href="{{CANONICAL}}">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="{{THEME_COLOR_DARK}}" data-theme-color-dark="{{THEME_COLOR_DARK}}" data-theme-color-light="{{THEME_COLOR_LIGHT}}">
+<link rel="icon" href="{{FAVICON_HREF}}" type="image/svg+xml">
+<link rel="icon" href="{{ICON_PNG_HREF}}" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{{APPLE_TOUCH_ICON_HREF}}">
+<link rel="manifest" href="{{MANIFEST_HREF}}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{BRAND}}">
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="{{CANONICAL}}">
+<meta property="og:image" content="{{OG_IMAGE_URL}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{OG_IMAGE_ALT}}">
+<meta property="og:locale" content="{{OG_LOCALE}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{TITLE}}">
+<meta name="twitter:description" content="{{DESCRIPTION}}">
+<meta name="twitter:image" content="{{OG_IMAGE_URL}}">
+<meta name="twitter:image:alt" content="{{OG_IMAGE_ALT}}">
+<link rel="stylesheet" href="{{CSS_HREF}}">
+<script>
+/* Applies the stored theme before first paint (avoids a flash of the wrong theme)
+   and marks that JavaScript is available, so the menu button can be revealed. */
+(function () {
+  document.documentElement.classList.add('js');
+  try {
+    var stored = window.localStorage.getItem('sk-core-theme');
+    var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  } catch (error) { /* storage unavailable: keep the dark default */ }
+})();
+</script>
+<script src="{{JS_HREF}}" defer></script>
+{{JSONLD}}
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="{{HOME_HREF}}">
+      <span class="brand__mark" aria-hidden="true">{{BRAND_MARK}}</span>
+      <span class="brand__name">{{BRAND}}<span class="brand__sub">SK product catalog</span></span>
+    </a>
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="site-nav" id="site-nav" data-nav-panel data-open="false" aria-label="Primary">
+      <ul class="nav-list">
+{{NAV_ITEMS}}
+      </ul>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">{{HERO_EYEBROW}}</p>
+        <h1>{{HERO_HEADLINE}}</h1>
+        <p class="hero__sub">{{HERO_SUBHEAD}}</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="{{HERO_PRIMARY_HREF}}">{{HERO_PRIMARY_LABEL}}</a>
+          <a class="btn btn--ghost" href="{{HERO_SECONDARY_HREF}}">{{HERO_SECONDARY_LABEL}}</a>
+        </div>
+        <p class="hero__hint">{{HERO_HINT}}</p>
+      </div>
+
+      <aside class="orbit" aria-label="How SK CORE connects to each product">
+        <p class="orbit__title">How this page works</p>
+        <div class="orbit__rows">
+{{ORBIT_ROWS}}
+        </div>
+        <p class="orbit__center">{{BRAND_MARK_SMALL}} Each product keeps its own website, accounts and deployment.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="products" aria-labelledby="products-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="products-heading">Products</h2>
+        <p>{{PRODUCTS_INTRO}}</p>
+      </div>
+{{PRODUCT_GROUPS}}
+    </div>
+  </section>
+
+  <section class="section" id="about" aria-labelledby="about-heading">
+    <div class="container about__grid">
+      <div>
+        <h2 id="about-heading">{{ABOUT_HEADING}}</h2>
+        <p>{{ABOUT_BODY}}</p>
+      </div>
+      <ul class="about__points">
+{{ABOUT_POINTS}}
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      <div>
+        <p class="site-footer__brand">
+          <span class="brand__mark" aria-hidden="true">{{BRAND_MARK}}</span>
+          <span class="brand__name">{{BRAND}}</span>
+        </p>
+        <p class="site-footer__note">{{FOOTER_NOTE}}</p>
+      </div>
+{{FOOTER_COLUMNS}}
+    </div>
+    <div class="site-footer__bottom">
+      <p>{{COPYRIGHT}}</p>
+      <p>{{DOMAIN}}</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+  "$comment": "Single source of truth for the SK CORE landing page. Edit this file, then run: npm run build. Product cards, navigation, metadata, sitemap and structured data are all generated from here. Never invent a product URL: leave `href` as null until the real production URL is supplied, and the card renders with a disabled action and a 'destination not configured' note.",
+  "site": {
+    "brand": "SK CORE",
+    "domain": "skcore.in",
+    "origin": "https://skcore.in",
+    "title": "SK CORE — One place for every SK product",
+    "description": "SK CORE is the central entry point for SK products. Browse the catalog and open any product website from one page.",
+    "tagline": "One Place. All Your SK Products.",
+    "themeColorDark": "#0b1220",
+    "themeColorLight": "#f6f8fb",
+    "locale": "en",
+    "copyrightStartYear": 2026
+  },
+  "navigation": [
+    { "label": "Products", "href": "#products", "external": false }
+  ],
+  "hero": {
+    "eyebrow": "SK ecosystem",
+    "headline": "One Place. All Your SK Products.",
+    "subhead": "SK CORE is the central page for the SK product family. Pick a product below and you are taken straight to its own website.",
+    "primaryCta": { "label": "Browse products", "href": "#products" },
+    "secondaryCta": { "label": "What is SK CORE?", "href": "#about" }
+  },
+  "about": {
+    "heading": "What SK CORE is",
+    "body": "SK CORE is a directory, not a platform that stores your data: each SK product keeps running as its own independent website, with its own accounts and its own domain. This page only lists them and links to them.",
+    "points": [
+      "One catalog that lists every SK product and where to find it.",
+      "Each product stays independently deployed and independently operated.",
+      "New products are registered in a single configuration file, so the catalog grows without a redesign."
+    ]
+  },
+  "products": [
+    {
+      "id": "sk-auth",
+      "name": "SK AUTH",
+      "category": "Authentication and licensing",
+      "tagline": "Authentication and software licensing.",
+      "description": "Account authentication and license-key management for applications, with a sign-in panel and a Discord bot for key operations.",
+      "highlights": ["Accounts and sessions", "Two-factor sign-in", "License keys"],
+      "status": "available",
+      "href": null,
+      "urlNote": "Production URL not confirmed. The SK AUTH repository references auth.skcore.in as its intended custom domain (on unmerged branches), so this link stays disabled until you confirm the live hostname.",
+      "icon": "icons/sk-auth.svg"
+    },
+    {
+      "id": "sk-assistant",
+      "name": "SK ASSISTANT",
+      "category": "Automation",
+      "tagline": "Discord bot and server automation services.",
+      "description": "A Discord bot that automates server tasks, with an optional OAuth dashboard published by the bot itself.",
+      "highlights": ["Discord bot", "Server automation"],
+      "status": "available",
+      "href": null,
+      "urlNote": "No production URL is recorded in the SK ASSISTANT project (its deployment documentation still uses a placeholder base URL). This link stays disabled until you supply the real website address.",
+      "icon": "icons/sk-assistant.svg"
+    }
+  ],
+  "footer": {
+    "note": "SK products are independent websites and independent services.",
+    "columns": [
+      {
+        "heading": "This site",
+        "links": [
+          { "label": "Products", "href": "#products" },
+          { "label": "About", "href": "#about" }
+        ]
+      }
+    ]
+  }
+}

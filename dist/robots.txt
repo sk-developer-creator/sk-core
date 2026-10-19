@@ -1,0 +1,5 @@
+# SK CORE
+User-agent: *
+Allow: /
+
+Sitemap: https://skcore.in/sitemap.xml

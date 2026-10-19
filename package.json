@@ -1,0 +1,18 @@
+{
+  "name": "sk-core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SK CORE — central landing page for the SK product ecosystem (skcore.in).",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "node scripts/build.mjs && node scripts/check.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

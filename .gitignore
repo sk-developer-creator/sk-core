@@ -1,0 +1,12 @@
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local preview / editor noise
+*.log
+.idea/
+.vscode/
+
+# dist/ is committed on purpose: it is the deployable artefact and is rebuilt by
+# `npm run build`. Remove the next line if you would rather build on the host.

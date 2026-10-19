@@ -1,0 +1,22 @@
+{
+  "name": "SK CORE",
+  "short_name": "SK CORE",
+  "description": "SK CORE is the central entry point for SK products. Browse the catalog and open any product website from one page.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
