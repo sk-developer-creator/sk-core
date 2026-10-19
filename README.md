@@ -4,8 +4,9 @@ One page at **https://skcore.in** that lists the SK products and sends visitors 
 product's own website. SK CORE itself is only a directory: every product stays an
 independent site with its own accounts, data and deployment.
 
-**Status: built and verified locally. Not deployed.** Nothing has been pushed, no DNS
-record has been touched, and no SK_AUTH file was modified.
+**Status: published to GitHub Pages (`https://sk-developer-creator.github.io/sk-core/`). Not yet
+served from `skcore.in` — no DNS record has been touched, and no SK_AUTH file was modified.**
+See `DEPLOYMENT.md` for what was executed and what still needs approval.
 
 ---
 

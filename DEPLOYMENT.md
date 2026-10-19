@@ -3,11 +3,37 @@
 **Target:** publish the existing `dist/` build at **https://skcore.in**, with the SK AUTH card
 linking to **https://auth.skcore.in**. SK CORE and SK AUTH stay independent deployments.
 
-**Status: prepared, awaiting approval. Nothing has been pushed, created, or changed remotely,
-and no DNS record has been touched.** The only work done so far is read-only inspection plus
-the local files listed in §5.1.
+**Status: Phase 1 done — the site is built and published to GitHub Pages' own URL. Phase 2
+(DNS) is awaiting approval; no DNS record has been touched.**
 
 Date of inspection: 2026-10-19.
+
+## 0. Phase 1 result (executed, approved)
+
+Everything below was approved before it ran. Evidence, not claims:
+
+| Step | Result |
+| --- | --- |
+| Repository | `https://github.com/sk-developer-creator/sk-core` created — **public**, so Pages works on the free plan |
+| Push | `master -> master`, no force. Remote `master` = `ac7b4d9`; local `.git/config` contains **no token** (checked) |
+| Pages | enabled with `build_type: workflow` |
+| CI run #1 | **completed / success** — `actions/runs/39195385098`. The workflow ran `npm run build`, `npm run check` (123/0) and `git diff --exit-code -- dist` in CI |
+| Interim URL | `https://sk-developer-creator.github.io/sk-core/` → **HTTP 200**, title "SK CORE — One place for every SK product" |
+| Content match | served `index.html` sha256 `3bbea5a6…aaf9fc` **=** the local `dist/index.html` — identical bytes |
+| SK AUTH link | present; Railway fallback absent; SK MAIL absent; SK ASSISTANT still has no link |
+| Custom 404 | unknown path → **HTTP 404** rendering our own 404 page |
+| `robots.txt` / `sitemap.xml` / `site.webmanifest` | all HTTP 200 |
+
+One expected caveat of the interim URL: the page uses **root-relative** paths (`/assets/…`, as
+required), so at the interim `/sk-core/` sub-path those asset URLs 404 and the page renders
+unstyled. That is a property of the sub-path, not of the build — at the apex domain the site is
+served from `/` and every asset resolves. Verified separately: `/assets/css/styles.css` returns
+200 once resolved from the domain root.
+
+The custom domain (`skcore.in`) is deliberately **not set yet**: setting it makes GitHub redirect
+the interim URL to the domain, which would break the interim check before DNS exists. It is set
+in the same step as the DNS records, immediately before they go live (GitHub's recommended order
+for takeover protection).
 
 ---
 
@@ -88,7 +114,7 @@ proposed until DomainIndia's ALIAS/flattening support is confirmed in its panel.
   Inactive until the repo exists and Pages source is set to "GitHub Actions".
 * This document.
 
-### 5.2 Phase 1 — publish the site to the host *(remote change; needs your approval)*
+### 5.2 Phase 1 — publish the site to the host *(executed, approved — see §0)*
 
 ```powershell
 cd C:\Users\Administrator\Desktop\SK_CORE
@@ -185,8 +211,10 @@ The rollback is small, and it returns the zone to exactly today's state:
 
 ## 10. What has deliberately not been done
 
-* No remote hosting resource created; no repository created; nothing pushed.
-* No DNS record read-modify-write; no delegation of `skcore.in` to another DNS provider.
+* **No DNS record has been read-modified-written, and `skcore.in` still publishes no address
+  records.** The only remote changes are the ones approved in Phase 1 (§0).
+* No delegation of `skcore.in` to another DNS provider; no nameserver change.
+* The custom domain is not set in Pages yet (see §0 for why that ordering is deliberate).
 * SK AUTH source, database, environment variables, Railway configuration, branches and
   deployment: **untouched**. Its Railway fallback hostname stays documented in `site.config.json`
   and is **not** published on the page.
