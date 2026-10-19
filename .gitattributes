@@ -1,0 +1,6 @@
+# Keep line endings deterministic across machines: the build writes LF, and the
+# generated files should not churn on checkout.
+* text=auto eol=lf
+
+# Binary artefacts: never normalise.
+*.png binary
