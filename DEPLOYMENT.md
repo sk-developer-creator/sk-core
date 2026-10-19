@@ -3,12 +3,12 @@
 **Target:** publish the existing `dist/` build at **https://skcore.in**, with the SK AUTH card
 linking to **https://auth.skcore.in**. SK CORE and SK AUTH stay independent deployments.
 
-**Status: Phase 1 done — the site is built and published to GitHub Pages' own URL. Phase 2
-(DNS) is awaiting approval; no DNS record has been touched.**
+**Status: LIVE at https://skcore.in.** All three phases are complete and verified against the
+live domain. No SK_AUTH file, service, branch, or DNS record was modified.
 
 Date of inspection: 2026-10-19.
 
-## 0. Phase 1 result (executed, approved)
+## 0. Result (executed with approval)
 
 Everything below was approved before it ran. Evidence, not claims:
 
@@ -30,10 +30,46 @@ unstyled. That is a property of the sub-path, not of the build — at the apex d
 served from `/` and every asset resolves. Verified separately: `/assets/css/styles.css` returns
 200 once resolved from the domain root.
 
-The custom domain (`skcore.in`) is deliberately **not set yet**: setting it makes GitHub redirect
-the interim URL to the domain, which would break the interim check before DNS exists. It is set
-in the same step as the DNS records, immediately before they go live (GitHub's recommended order
-for takeover protection).
+### Phase 2 — DNS (applied by you at DomainIndia, approved)
+
+| Record | Applied value | Verified |
+| --- | --- | --- |
+| `A` `@` × 4 | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` | returned by both authoritative nameservers and by two independent public resolvers |
+| `CNAME` `www` | `sk-developer-creator.github.io` | present |
+| `AAAA`, `TXT` challenge | not added (you chose the required records only) | — |
+
+The zone serial moved from `2026101807` (before) to `2026101905` (after) — that is how we know the
+edit was really published rather than merely cached locally. `auth.skcore.in` was untouched
+throughout and answered 200 the whole time.
+
+### Phase 3 — production verification (live, 2026-10-19)
+
+| Check | Result |
+| --- | --- |
+| `https://skcore.in/` | **HTTP 200**, 14 781 bytes |
+| Content identity | served `index.html` sha256 `3bbea5a6…aaf9fc` **=** the verified local `dist/index.html` — byte-identical |
+| `http://skcore.in/` | **301 →** `https://skcore.in/` |
+| `https://www.skcore.in/` | **301 →** `https://skcore.in/` |
+| TLS | authorised, TLSv1.3, Let's Encrypt (`YR2`), CN `skcore.in`, SAN `skcore.in` + `www.skcore.in`, valid 2026-10-19 → 2027-01-17 |
+| HTTPS enforcement | enabled in Pages (`https_enforced: true`) |
+| Assets | `styles.css`, `app.js`, `favicon.svg`, icons 32/180/512, `og-image.png`, `site.webmanifest` — all HTTP 200 |
+| `robots.txt` / `sitemap.xml` | HTTP 200, both cite `https://skcore.in` |
+| Unknown path | **HTTP 404** rendering the custom page ("Page not found — SK CORE") |
+| Console (real browser) | empty — no messages or errors, including after theme switching |
+| Network | 3 requests, all same-origin `https://skcore.in`, none failed, **zero external requests** |
+| Outbound links | exactly one: `https://auth.skcore.in` with `target="_blank"` and `rel="noopener noreferrer"` |
+| SK AUTH click-through | <kbd>Enter</kbd> on the focused card link opened `https://auth.skcore.in/` — title and `h1` **"SK AUTH"** |
+| SK ASSISTANT | still zero links, disabled action, no invented URL |
+| Railway fallback / SK MAIL | absent from every served file |
+| Theme switch | dark default → light → dark; `data-theme`, `aria-pressed`, accessible label, `localStorage` and `theme-color` all update, and the choice survives a reload |
+| Keyboard walk | 7 <kbd>Tab</kbd> stops, each with a visible 2 px outline, including the SK AUTH card link |
+| Lighthouse (live) | accessibility **1**, best practices **1**, SEO **1**, **0 failures** |
+| Layout | no horizontal overflow at the browser's 800 px viewport; HTML/CSS/JS are byte-identical to the build verified at 390/800/1440 px locally |
+
+The custom domain was set in Pages immediately before the records went live (GitHub's recommended
+order, for takeover protection). One consequence was observed while the records propagated: the
+interim `*.github.io` URL 301-redirected to `skcore.in` and nothing answered until the records
+published. That resolved as soon as DNS went live.
 
 ---
 
@@ -136,18 +172,19 @@ Then, once you approve:
 5. Set the custom domain `skcore.in` in **Settings → Pages → Custom domain** *before* the DNS
    records are added (GitHub recommends this order — it prevents anyone else claiming the domain).
 
-### 5.3 Phase 2 — DNS *(needs your explicit approval of §6; I will not apply it)*
+### 5.3 Phase 2 — DNS *(applied by you at DomainIndia, approved — see §0)*
 
-You apply the records in the DomainIndia panel. I hold no DomainIndia credentials, and I will not
-ask you to paste a password or token into this session.
+The records were added in the DomainIndia panel by you. I hold no DomainIndia credentials and did
+not request any.
 
-### 5.4 Phase 3 — verification (live, read-only)
+### 5.4 Phase 3 — verification *(executed — see §0)*
 
 See §9.
 
-## 6. Exact DNS changes to add at DomainIndia — **awaiting your approval**
+## 6. DNS changes applied at DomainIndia (approved and verified)
 
-Hostname `skcore.in` is the zone apex; most panels accept `@` or a blank name for it.
+The records below are now live. Hostname `skcore.in` is the zone apex; most panels accept `@` or a
+blank name for it.
 
 | # | Type | Name | Value | Purpose |
 | --- | --- | --- | --- | --- |
@@ -163,9 +200,10 @@ Notes, stated precisely:
 
 * Records 1–4 and the `www` target are GitHub's **documented fixed values** — I did not invent
   them, and they cannot be derived from a host dashboard because they are constants.
-* Record 7 is **generated by GitHub per account** and is displayed in
-  repo → Settings → Pages → *Verify your custom domain*. I will read the exact value from there
-  and hand it to you; I will not guess it.
+* Record 7 was **not added** (you chose the required records only). It is optional: it proves
+  ownership of the domain to GitHub and guards against domain takeover. Its value is generated by
+  GitHub per account and shown in repo → Settings → Pages → *Verify your custom domain*; it is not
+  exposed by the API, so it can only be read from that page.
 * Record 5 is optional. Add it only together with the `A` records; IPv6-only resolution is not
   recommended by GitHub.
 * **Nothing existing is replaced or removed.** The apex has no records today, `www` does not
@@ -197,7 +235,10 @@ The rollback is small, and it returns the zone to exactly today's state:
 3. **Untouched throughout:** the SK AUTH repository, its Railway service, its database, its
    environment variables, and `auth.skcore.in`.
 
-## 9. Post-deployment verification to run after approval
+## 9. Post-deployment verification performed
+
+Results are in §0 (Phase 3). The checklist below is what was checked, and it can be repeated at any
+time:
 
 * `https://skcore.in` returns **HTTP 200** and serves byte-identical content to the verified local
   `dist/index.html`.
@@ -211,10 +252,9 @@ The rollback is small, and it returns the zone to exactly today's state:
 
 ## 10. What has deliberately not been done
 
-* **No DNS record has been read-modified-written, and `skcore.in` still publishes no address
-  records.** The only remote changes are the ones approved in Phase 1 (§0).
-* No delegation of `skcore.in` to another DNS provider; no nameserver change.
-* The custom domain is not set in Pages yet (see §0 for why that ordering is deliberate).
+* DNS was changed only as listed in §6, by you, at DomainIndia. This repository never wrote DNS,
+  and `skcore.in` was not delegated to another DNS provider — the nameservers are unchanged.
+* The custom domain was set in Pages only at the point the records were about to go live (§0).
 * SK AUTH source, database, environment variables, Railway configuration, branches and
   deployment: **untouched**. Its Railway fallback hostname stays documented in `site.config.json`
   and is **not** published on the page.

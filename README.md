@@ -4,9 +4,9 @@ One page at **https://skcore.in** that lists the SK products and sends visitors 
 product's own website. SK CORE itself is only a directory: every product stays an
 independent site with its own accounts, data and deployment.
 
-**Status: published to GitHub Pages (`https://sk-developer-creator.github.io/sk-core/`). Not yet
-served from `skcore.in` — no DNS record has been touched, and no SK_AUTH file was modified.**
-See `DEPLOYMENT.md` for what was executed and what still needs approval.
+**Status: live at https://skcore.in**, served by GitHub Pages from the `sk-developer-creator/sk-core`
+repository. SK_AUTH source, database, Railway service and DNS record are untouched.
+See `DEPLOYMENT.md` for what was executed and how it was verified.
 
 ---
 
@@ -140,8 +140,10 @@ Run `npm run check` to reproduce. Current result: **123 passed, 0 failed.**
 * Contrast: WCAG AA ratios are asserted for every themed text/background pair in both
   themes (three light-theme tokens were darkened because the first run failed this check).
 
-Not verified, because it has not happened: **no deployment, no DNS change, no check of
-`https://skcore.in`.** The sections below are findings and a plan, not a report.
+Deployed and verified on 2026-10-19: **https://skcore.in** returns HTTP 200 with content
+byte-identical to this build, over a valid Let's Encrypt certificate, with the checks in §7's
+`DEPLOYMENT.md` (§0, Phase 3) — Lighthouse accessibility/best-practices/SEO all 1.0 on the live
+site, clean console, one outbound link. The sections below remain the reconnaissance record.
 
 ## 6. Hosting and DNS findings (read-only reconnaissance, 2026-10-19)
 
@@ -150,8 +152,8 @@ Google), plus HTTP and TLS probes. No changes were made.
 
 | Name | State |
 | --- | --- |
-| `skcore.in` (apex) | **Exists but publishes no address records** — no `A`, `AAAA`, `CNAME`, `TXT`, `MX` or `CAA`. Nothing serves a website at the apex today, so nothing would be replaced. |
-| `www.skcore.in` | `NXDOMAIN` — does not exist. |
+| `skcore.in` (apex) | **Deployed 2026-10-19**: four `A` records pointing at GitHub Pages (`185.199.108–111.153`), serving this page over HTTPS. No `AAAA`, `MX`, `TXT` or `CAA`. Before that date the apex published no address record at all, so nothing was replaced. |
+| `www.skcore.in` | `CNAME → sk-developer-creator.github.io`; redirects to `https://skcore.in/`. |
 | `auth.skcore.in` | `CNAME → p9ji6rcj.up.railway.app`, `A 69.46.46.82`; live, serving the SK AUTH panel over HTTPS (`HTTP 200`, title "SK AUTH"). |
 | `*.skcore.in` wildcard | None (a random subdomain returns `NXDOMAIN`). |
 | `mail.skcore.in` | No records (consistent with no mail product). |
@@ -176,15 +178,16 @@ Google), plus HTTP and TLS probes. No changes were made.
   The `401` on `/api/auth/me` is normal for a signed-out visitor. **I changed nothing in
   SK AUTH** — this is a report only.
 
-## 7. Deploying the standalone SK CORE frontend (needs your approval)
+## 7. How SK CORE is deployed (done)
 
 The artefact is a plain static directory: `dist/` (16 files, ~68 KB). No server code, no
-database, no build-time secret. Nothing below has been executed.
+database, no build-time secret.
 
-**`DEPLOYMENT.md` is the concrete plan**: it evaluates what is actually available on this
-machine, recommends GitHub Pages, lists the exact commands, the exact DNS records to add at
-DomainIndia, the HTTPS step, the rollback, and the post-deployment checks. The options below
-are the general shape of the decision it resolves.
+**Deployed 2026-10-19 on GitHub Pages**, from the public repository
+`https://github.com/sk-developer-creator/sk-core`, with `.github/workflows/deploy-pages.yml`
+building `dist/`, running `npm run check`, and publishing it. **`DEPLOYMENT.md` holds the full
+record**: the host evaluation, the exact commands, the DNS records that were added, the TLS
+result, the rollback procedure, and the live verification evidence.
 
 **Option A — a static host (Cloudflare Pages / Netlify / Vercel / GitHub Pages)**
 1. Point the host at this repository; build command `npm run build`, output directory `dist`
@@ -223,10 +226,8 @@ temporarily.
    in that project (its deployment doc still uses `https://sk.example.com`), and DNS shows no
    `assistant.skcore.in`. Give me the real address and it becomes a one-line change plus
    `verifiedNote`.
-3. **Host choice and DNS approval** — see `DEPLOYMENT.md`: it recommends GitHub Pages (a new
-   separate repository, standard apex `A` records, no DNS-provider change) and lists the exact
-   records for approval. Required before any record is created at DomainIndia or the apex is
-   pointed anywhere.
+3. **Host choice and DNS — done.** GitHub Pages (public repo, standard apex `A` records, no
+   DNS-provider change); records added at DomainIndia and verified live. See `DEPLOYMENT.md` §0.
 4. **Footer links** — kept to this page only ("Products", "About"). No privacy policy, terms,
    status page or social links were invented.
 5. **Google Sign-In origin on SK AUTH** — see the note at the end of §6; it needs a change in
