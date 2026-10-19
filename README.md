@@ -54,9 +54,12 @@ Everything the page shows comes from `site.config.json`. Add an object to `produ
   "description": "One or two factual sentences. Do not invent capabilities.",
   "highlights": ["Short", "Feature", "Chips"],
   "status": "available",
-  "href": "https://mail.skcore.in",
-  "urlNote": "Only shown when href is null.",
-  "icon": "icons/sk-mail.svg"
+  "href": "https://example-subdomain.skcore.in",
+  "verifiedNote": "How and when this exact URL was checked (required once href is set).",
+  "fallbackHref": "https://optional-temporary-fallback-host",
+  "fallbackNote": "Required if fallbackHref is used. Recorded for outages; not published on the page.",
+  "urlNote": "Only read when href is null: explains why there is no link yet.",
+  "icon": "icons/sk-example.svg"
 }
 ```
 
@@ -67,6 +70,17 @@ Everything the page shows comes from `site.config.json`. Add an object to `produ
 * **Disable the product** — set `"status": "coming-soon"`; the badge changes and the card
   is styled as unavailable.
 * **Remove** — delete the entry (its card disappears).
+
+Two extra fields exist for traceability:
+
+* `verifiedNote` — **required whenever `href` is set.** One sentence saying how and when the
+  URL was actually checked (the check fails without it). This is what keeps an unverified
+  guess from silently becoming a published link.
+* `fallbackHref` + `fallbackNote` — an optional temporary address for the same service,
+  used when the primary domain is not attached or is having an outage. It is *documented*
+  (and validated) but deliberately **not rendered on the page**: the check fails if a
+  fallback URL ever appears in the built HTML, because the page must only send visitors to
+  the primary product URL.
 
 Products sharing a `category` are grouped under one heading; with a single category the
 grouping headings disappear automatically. Nothing in the markup is duplicated by hand.
@@ -96,75 +110,125 @@ binary design source to keep in sync. To restyle them, edit `buildOgImage()` /
 
 ## 5. Verification performed (local, this build)
 
-Run `npm run check` to reproduce. Current result: **111 passed, 0 failed.**
+Run `npm run check` to reproduce. Current result: **123 passed, 0 failed.**
 
 * Build and check both exit 0; `dist/` is newer than `site.config.json`.
-* Lighthouse (local preview, real browser): **accessibility 1.0, best practices 1.0, SEO 1.0**.
+* Lighthouse (local preview, real browser): **accessibility 1.0, best practices 1.0, SEO 1.0** (0 failures).
+* Product links, checked against the live sites (read-only requests):
+  * SK AUTH card renders `<a href="https://auth.skcore.in" target="_blank" rel="noopener noreferrer">`
+    and the whole card is clickable (stretched link).
+  * Pressing <kbd>Enter</kbd> on the focused card link opened a new tab at
+    `https://auth.skcore.in/`, which loaded with `HTTP 200` and title/`h1` **"SK AUTH"**.
+  * SK AUTH card holds the only outbound link on the page; the Railway fallback address
+    appears in **no** built file.
+  * SK ASSISTANT card contains **zero** links, shows a disabled `aria-disabled="true"` action
+    and the note explaining that its address is not confirmed.
+  * Structured data lists exactly one product URL (`https://auth.skcore.in`).
 * Browser checks with the built files served over HTTP:
-  * 6 network requests, all same-origin, all `200`; **zero external requests**; console clean.
+  * 6 network requests, all same-origin, all `200`; **zero external requests**; the landing
+    page's console is clean.
   * Unknown path returns **HTTP 404** and renders the custom 404 page.
   * Theme switch verified: `data-theme`, `aria-pressed`, button label, `localStorage` and
     `theme-color` all update; light-theme contrast checked.
-  * Mobile (390 px, via a sized frame): menu button appears, panel opens/closes, `aria-expanded`
-    toggles, Escape closes and returns focus, **no horizontal overflow**.
-  * Tab order starts at the skip link, which becomes visible on focus; visible focus ring on
-    controls; exactly one `h1` per page; heading levels never skip.
-  * Both product cards expose **no link** while `href` is null and show
-    `aria-disabled="true"` on the action.
+  * Mobile (390 px), tablet (800 px) and desktop (1440 px): **no horizontal overflow**;
+    menu button appears only on small screens, opens/closes, `aria-expanded` toggles,
+    Escape closes and returns focus.
+  * Real <kbd>Tab</kbd> walk: every focus stop shows a 2 px visible outline; the skip link
+    becomes visible on focus; the focused product link also highlights its card border
+    (`:focus-within`). Exactly one `h1` per page; heading levels never skip.
 * Contrast: WCAG AA ratios are asserted for every themed text/background pair in both
   themes (three light-theme tokens were darkened because the first run failed this check).
 
-Not verified, because it has not happened: **no deployment, no DNS change, no production
-check on skcore.in.** The section below is a plan, not a report.
+Not verified, because it has not happened: **no deployment, no DNS change, no check of
+`https://skcore.in`.** The sections below are findings and a plan, not a report.
 
-## 6. Deploying to skcore.in (needs your approval)
+## 6. Hosting and DNS findings (read-only reconnaissance, 2026-10-19)
 
-The artefact is a plain static directory: `dist/`. Any of these work.
+Checked with the local resolver and two public DNS-over-HTTPS resolvers (Cloudflare,
+Google), plus HTTP and TLS probes. No changes were made.
 
-**Option A — existing static host (Cloudflare Pages / Netlify / Vercel / GitHub Pages)**
-1. Publish the repository; set the build command to `npm run build` and the output
-   directory to `dist` (or upload `dist/` as-is — it is self-contained).
-2. Add the custom domain `skcore.in` (and `www.skcore.in` if wanted) in the host's panel.
-3. Point DNS at the host: an `A`/`ALIAS` record for the apex and a `CNAME` for `www`,
-   using the exact values the host prints. **Do not create these records until you have
-   approved them** — and check first whether `skcore.in` already serves something else.
-4. Let the host issue the TLS certificate.
-5. Configure the host's 404 handling to serve `dist/404.html` (some hosts need this set
-   explicitly; others pick it up automatically).
+| Name | State |
+| --- | --- |
+| `skcore.in` (apex) | **Exists but publishes no address records** — no `A`, `AAAA`, `CNAME`, `TXT`, `MX` or `CAA`. Nothing serves a website at the apex today, so nothing would be replaced. |
+| `www.skcore.in` | `NXDOMAIN` — does not exist. |
+| `auth.skcore.in` | `CNAME → p9ji6rcj.up.railway.app`, `A 69.46.46.82`; live, serving the SK AUTH panel over HTTPS (`HTTP 200`, title "SK AUTH"). |
+| `*.skcore.in` wildcard | None (a random subdomain returns `NXDOMAIN`). |
+| `mail.skcore.in` | No records (consistent with no mail product). |
 
-**Option B — the Railway/Render project you already use for SK_AUTH**
-Add a second static service in the same project, root `dist/`, and attach the domain in
-that service's settings. Keep it a separate service so SK CORE deploys independently of
-SK_AUTH.
+* **Authoritative DNS / registrar: DomainIndia** — `NS a.ns.domainindia.net`, `b.ns.domainindia.net`,
+  `SOA ... hostmaster.domainindia.net` (zone serial `2026101807`, i.e. last touched 2026-10-18,
+  the same day the `auth` certificate was issued). Any new record for SK CORE has to be added
+  in that panel, or the zone delegated to another DNS provider first.
+* **Hosting for SK AUTH: Railway** (`server: railway-hikari`, `x-railway-edge: sin1` =
+  Singapore), matching the repository's `railway.json`. The temporary fallback hostname and
+  the custom domain answer from the same service: identical page size (14 962 bytes) and an
+  identical `/api/health` payload, so `auth.skcore.in` is definitely that deployment.
+* **TLS**: `auth.skcore.in` presents a valid Let's Encrypt certificate
+  (SAN `auth.skcore.in`, valid 2026-10-18 → 2027-01-16, verified `authorized: true`).
+  No `CAA` record exists on the domain, so nothing blocks a future certificate — including
+  one for the apex.
+* **Separate finding, on SK AUTH itself (not SK CORE):** loading `https://auth.skcore.in/`
+  logged `[GSI_LOGGER]: The given origin is not allowed for the given client ID`, plus a
+  `404` for `/api/branding/logo`. The Google OAuth client that SK AUTH uses does not list
+  `https://auth.skcore.in` as an allowed JavaScript origin, so "Continue with Google" will
+  not work on the custom domain until that origin is added in the Google Cloud console.
+  The `401` on `/api/auth/me` is normal for a signed-out visitor. **I changed nothing in
+  SK AUTH** — this is a report only.
+
+## 7. Deploying the standalone SK CORE frontend (needs your approval)
+
+The artefact is a plain static directory: `dist/` (16 files, ~68 KB). No server code, no
+database, no build-time secret. Nothing below has been executed.
+
+**Option A — a static host (Cloudflare Pages / Netlify / Vercel / GitHub Pages)**
+1. Point the host at this repository; build command `npm run build`, output directory `dist`
+   (or upload `dist/` as-is — it is self-contained and committed).
+2. Add `skcore.in` as a custom domain in the host's panel (add `www.skcore.in` too if you want
+   it; note it does not exist yet).
+3. Create the DNS records the host prints, in the **DomainIndia** panel:
+   apex `A`/`ALIAS`/`ANAME` → host value, and `CNAME www` → host value.
+   *(Cloudflare/Netlify/Vercel cannot be managed from here; the values must come from the
+   host's own screen.)*
+4. Let the host issue the TLS certificate, then confirm `https://skcore.in/` returns the page.
+5. Serve `dist/404.html` for unknown paths (some hosts need this set explicitly).
+
+**Option B — a second service in the Railway project that runs SK AUTH**
+1. Create a **new static service** in the same project (do not reuse the SK AUTH service).
+2. Deploy `dist/` (root `dist`), then attach the custom domain `skcore.in` in that service's
+   settings and create the `CNAME`/`A` records Railway prints at DomainIndia.
+   This keeps SK CORE independently deployable while reusing infrastructure you already run.
 
 **Option C — your own server (nginx)**
 Copy `dist/` to `/var/www/skcore`, serve it with `root /var/www/skcore;`,
-`try_files $uri $uri/ =404;` and `error_page 404 /404.html;`, then obtain a certificate
-for `skcore.in` with your usual ACME client.
+`try_files $uri $uri/ =404;`, `error_page 404 /404.html;`, add an apex `A` record for the
+server's public IP at DomainIndia, then issue a certificate with your usual ACME client.
 
-Nothing in this project forces a specific host: there is no server code, no database and
-no build-time secret.
+**Park the apex until then.** Because `skcore.in` currently publishes no address record, its
+absence of a website is expected — leave it that way rather than pointing it somewhere
+temporarily.
 
-## 7. Open items that need your decision
+## 8. Open items that need your decision
 
-1. **SK AUTH production URL** — not verifiable from the workspace. The SK_AUTH repository
-   mentions `https://auth.skcore.in` in `README.md` and `.env.example`, but only on
-   unmerged branches, phrased as "once the custom domain is attached". That is strong
-   evidence, not confirmation, so the card currently ships with no link.
-   *If it is live today, say so and I will set `href` — a one-line change.*
-2. **SK ASSISTANT website URL** — no production URL exists anywhere in that project; its
-   deployment doc still uses the placeholder `https://sk.example.com`. The card ships with
-   no link until you provide the address.
-3. **Whether `skcore.in` currently serves anything**, and which host option (A/B/C) you
-   want, before any DNS record is created.
-4. **Footer links** — kept to this page only ("Products", "About"). No privacy policy,
-   terms, status page or social links were invented. Tell me the real ones if you want
-   them in the footer.
+1. **SK AUTH URL — done.** `href` is now `https://auth.skcore.in`, verified live
+   (§6). The temporary Railway address `sk-auth-production-cda9.up.railway.app` is recorded in
+   `site.config.json` as `fallbackHref` and is **not** published on the page. Say the word if
+   you would rather show it publicly as a "if the main site is unreachable, try this" link.
+2. **SK ASSISTANT website URL** — still unconfigured, deliberately. No production URL exists
+   in that project (its deployment doc still uses `https://sk.example.com`), and DNS shows no
+   `assistant.skcore.in`. Give me the real address and it becomes a one-line change plus
+   `verifiedNote`.
+3. **Host choice (A/B/C) and DNS approval** — required before any record is created at
+   DomainIndia or the apex is pointed anywhere.
+4. **Footer links** — kept to this page only ("Products", "About"). No privacy policy, terms,
+   status page or social links were invented.
+5. **Google Sign-In origin on SK AUTH** — see the note at the end of §6; it needs a change in
+   your Google Cloud console (not in any repo).
 
-## 8. Deliberate omissions
+## 9. Deliberate omissions
 
 Per the brief, this project has **no** backend API, database, authentication, dashboard,
 admin panel, email delivery, billing, support portal or documentation site. SK MAIL is
 **not** part of the catalog. There are no testimonials, customer counts, prices, quotas,
 uptime figures or "all systems operational" badges anywhere in the page, because none of
-those facts were supplied. Product links stay disabled until a URL is confirmed.
+those facts were supplied. A product link is only published once its URL has been verified,
+and it must carry a `verifiedNote` saying how.

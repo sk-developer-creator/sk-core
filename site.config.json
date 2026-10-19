@@ -40,8 +40,10 @@
       "description": "Account authentication and license-key management for applications, with a sign-in panel and a Discord bot for key operations.",
       "highlights": ["Accounts and sessions", "Two-factor sign-in", "License keys"],
       "status": "available",
-      "href": null,
-      "urlNote": "Production URL not confirmed. The SK AUTH repository references auth.skcore.in as its intended custom domain (on unmerged branches), so this link stays disabled until you confirm the live hostname.",
+      "href": "https://auth.skcore.in",
+      "verifiedNote": "Verified live 2026-10-19: HTTPS 200 serving the SK AUTH panel, valid Let's Encrypt certificate for auth.skcore.in (CNAME -> p9ji6rcj.up.railway.app, Railway sin1).",
+      "fallbackHref": "https://sk-auth-production-cda9.up.railway.app",
+      "fallbackNote": "Temporary fallback only (same Railway service without the custom domain): https://sk-auth-production-cda9.up.railway.app. Recorded here so it is not lost; deliberately not published on the page.",
       "icon": "icons/sk-auth.svg"
     },
     {

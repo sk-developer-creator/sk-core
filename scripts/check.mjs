@@ -121,6 +121,14 @@ for (const product of products) {
     check(`${product.name}: URL is https`, /^https:\/\//i.test(href), String(href));
     check(`${product.name}: URL is not a placeholder`, !/example\.com|localhost|127\.0\.0\.1|TODO|your-|placeholder/i.test(href), String(href));
     check(`${product.name}: URL has no trailing slash or whitespace`, href === href.trim() && !href.endsWith('/'), String(href));
+    // Policy: a published link must carry evidence that it was actually checked.
+    check(`${product.name}: records how the URL was verified (verifiedNote)`, typeof product.verifiedNote === 'string' && product.verifiedNote.length > 20);
+    if (product.fallbackHref !== undefined) {
+      check(`${product.name}: fallback URL is https`, /^https:\/\//i.test(product.fallbackHref), String(product.fallbackHref));
+      check(`${product.name}: fallback URL is not a placeholder`, !/example\.com|localhost|127\.0\.0\.1|TODO|your-|placeholder/i.test(product.fallbackHref), String(product.fallbackHref));
+      check(`${product.name}: fallback is not the primary link`, product.fallbackHref !== href);
+      check(`${product.name}: fallback is documented (fallbackNote)`, typeof product.fallbackNote === 'string' && product.fallbackNote.length > 20);
+    }
   }
 }
 
@@ -210,21 +218,34 @@ check('every external link opens safely (target + rel)', externalLinks.length ==
 check('external links announce the new tab', externalLinks.every((m) => /opens in a new tab/.test(m[0])), `${externalLinks.length} external link(s)`);
 check('external link targets match the configuration', externalLinks.length === products.filter((p) => p.href).length, `${externalLinks.length} link(s) for ${products.filter((p) => p.href).length} configured product(s)`);
 
+const configuredHrefs = products.filter((p) => p.href).map((p) => p.href);
+check('the only outbound links are configured product URLs', externalLinks.every((m) => configuredHrefs.includes(m[1])), externalLinks.map((m) => m[1]).join(', '));
+for (const product of products.filter((p) => p.fallbackHref)) {
+  check(`${product.name}: the temporary fallback address is not published on the page`, !index.includes(product.fallbackHref));
+}
+
 section('Product cards reflect the configuration');
+// Isolate each card so "no link" can be asserted per product instead of globally.
+const cardBlocks = index.split('<article class="product-card').slice(1);
+const cardFor = (product) => cardBlocks.find((block) => block.includes(`product-${product.id}-name`)) || '';
+
 for (const product of products) {
   const href = product.href;
-  const cardId = `id="product-${product.id}-name"`;
-  check(`${product.name}: card rendered with an aria-labelledby target`, index.includes(cardId) && index.includes(`aria-labelledby="product-${product.id}-name"`));
-  check(`${product.name}: name, tagline and description appear`, index.includes(product.name) && index.includes(product.tagline) && index.includes(product.description));
+  const block = cardFor(product);
+  check(`${product.name}: card rendered with an aria-labelledby target`, block !== '' && index.includes(`aria-labelledby="product-${product.id}-name"`));
+  check(`${product.name}: name, tagline and description appear`, block.includes(product.name) && block.includes(product.tagline) && block.includes(product.description));
   if (href) {
-    check(`${product.name}: card links to ${href}`, index.includes(`href="${href}"`));
+    check(`${product.name}: card links to ${href}`, block.includes(`href="${href}"`));
+    check(`${product.name}: card link is a safe external link`, /href="https:\/\/[^"]+"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/.test(block));
+    check(`${product.name}: card link is announced as opening a new tab`, /opens in a new tab/.test(block));
+    check(`${product.name}: card does not show a disabled action`, !block.includes('Link unavailable'));
   } else {
-    check(`${product.name}: unconfigured link is disabled, not a dead link`, index.includes('Link unavailable') && !index.includes(`class="btn btn--primary btn--block card-link" href="#"`));
-    check(`${product.name}: card explains why the link is unavailable`, index.includes(product.urlNote));
+    check(`${product.name}: card contains no outbound link at all`, !/href="https?:/.test(block) && !block.includes('card-link'), 'unconfigured product must not link anywhere');
+    check(`${product.name}: card action is disabled for assistive tech`, block.includes('aria-disabled="true"') && block.includes('Link unavailable'));
+    check(`${product.name}: card explains why the link is unavailable`, block.includes(product.urlNote));
   }
 }
 check('card icons are inline SVG (no extra requests)', !/<img /.test(index));
-check('no product URL was invented for an unconfigured product', products.filter((p) => !p.href).length === 0 || !externalLinks.some((m) => /auth\.skcore\.in|sk-assistant/i.test(m[1])));
 
 section('Accessibility');
 check('skip link points at #main', /class="skip-link" href="#main"/.test(index) && index.includes('id="main"'));
