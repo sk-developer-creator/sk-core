@@ -3,44 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SK CORE — One place for every SK product</title>
-<meta name="description" content="SK CORE is the central entry point for SK products. Browse the catalog and open any product website from one page.">
+<title>SK CORE — Digital products, built beyond the ordinary</title>
+<meta name="description" content="SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.">
 <link rel="canonical" href="https://skcore.in/">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#0b1220" data-theme-color-dark="#0b1220" data-theme-color-light="#f6f8fb">
+<meta name="theme-color" content="#050407" data-theme-color-dark="#050407" data-theme-color-light="#050407">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/icons/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SK CORE">
-<meta property="og:title" content="SK CORE — One place for every SK product">
-<meta property="og:description" content="SK CORE is the central entry point for SK products. Browse the catalog and open any product website from one page.">
+<meta property="og:title" content="SK CORE — Digital products, built beyond the ordinary">
+<meta property="og:description" content="SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.">
 <meta property="og:url" content="https://skcore.in/">
 <meta property="og:image" content="https://skcore.in/assets/og/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="SK CORE — One Place. All Your SK Products.">
+<meta property="og:image:alt" content="SK CORE — Build Beyond the Ordinary.">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SK CORE — One place for every SK product">
-<meta name="twitter:description" content="SK CORE is the central entry point for SK products. Browse the catalog and open any product website from one page.">
+<meta name="twitter:title" content="SK CORE — Digital products, built beyond the ordinary">
+<meta name="twitter:description" content="SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.">
 <meta name="twitter:image" content="https://skcore.in/assets/og/og-image.png">
-<meta name="twitter:image:alt" content="SK CORE — One Place. All Your SK Products.">
+<meta name="twitter:image:alt" content="SK CORE — Build Beyond the Ordinary.">
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script>
-/* Applies the stored theme before first paint (avoids a flash of the wrong theme)
-   and marks that JavaScript is available, so the menu button can be revealed. */
-(function () {
-  document.documentElement.classList.add('js');
-  try {
-    var stored = window.localStorage.getItem('sk-core-theme');
-    var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
-  } catch (error) { /* storage unavailable: keep the dark default */ }
-})();
+/* Marks that JavaScript is available so progressive enhancements can be styled. */
+document.documentElement.classList.add('js');
 </script>
 <script src="/assets/js/app.js" defer></script>
+<script src="/assets/js/cosmos.js" defer></script>
 <script type="application/ld+json">{
   "@context": "https://schema.org",
   "@graph": [
@@ -48,7 +41,7 @@
       "@type": "WebSite",
       "name": "SK CORE",
       "url": "https://skcore.in/",
-      "description": "SK CORE is the central entry point for SK products. Browse the catalog and open any product website from one page.",
+      "description": "SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.",
       "inLanguage": "en"
     },
     {
@@ -68,118 +61,98 @@
 }</script>
 </head>
 <body>
+<div class="cosmos" aria-hidden="true">
+  <div class="cosmos__stars"></div>
+  <div class="cosmos__stars cosmos__stars--near"></div>
+  <div class="cosmos__haze"></div>
+  <div class="cosmos__beam"></div>
+  <canvas class="cosmos__canvas"></canvas>
+  <div class="cosmos__planet"></div>
+  <div class="cosmos__ring"></div>
+</div>
+<div class="ambient" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
 <a class="skip-link" href="#main">Skip to main content</a>
 
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="/">
-      <span class="brand__mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true" focusable="false">
-  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3.5" y="3.5" width="25" height="25" rx="7.5" stroke-width="1.7" opacity="0.5"/>
-    <path d="M16 12.6V6.6M16 19.4v6M12.6 16H6.6M19.4 16h6" stroke-width="1.7" opacity="0.75"/>
-    <circle cx="16" cy="16" r="3.2" fill="currentColor" stroke="none"/>
-    <circle cx="16" cy="16" r="6.4" stroke-width="1.4" opacity="0.35"/>
-    <circle cx="16" cy="5.4" r="2.05" fill="currentColor" stroke="none"/>
-    <circle cx="16" cy="26.6" r="2.05" fill="currentColor" stroke="none"/>
-    <circle cx="5.4" cy="16" r="2.05" fill="currentColor" stroke="none"/>
-    <circle cx="26.6" cy="16" r="2.05" fill="currentColor" stroke="none"/>
-  </g>
-</svg></span>
-      <span class="brand__name">SK CORE<span class="brand__sub">SK product catalog</span></span>
+      <span class="brand__mark" aria-hidden="true"><img src="/assets/icons/sk-core.png" alt="" width="112" height="112"></span>
+      <span class="brand__name">SK CORE<span class="brand__sub">DIGITAL PRODUCT ECOSYSTEM</span></span>
     </a>
     <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <nav class="site-nav" id="site-nav" data-nav-panel data-open="false" aria-label="Primary">
       <ul class="nav-list">
+        <li><a class="nav-link" href="#home">Home</a></li>
         <li><a class="nav-link" href="#products">Products</a></li>
+        <li><a class="nav-link" href="#about">About</a></li>
+        <li><a class="nav-link" href="#contact">Contact</a></li>
       </ul>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/></svg>
-      </button>
     </nav>
   </div>
 </header>
 
 <main id="main">
-
-  <section class="hero">
-    <div class="container hero__grid">
-      <div class="hero__copy">
-        <p class="eyebrow">SK ecosystem</p>
-        <h1>One Place. All Your SK Products.</h1>
-        <p class="hero__sub">SK CORE is the central page for the SK product family. Pick a product below and you are taken straight to its own website.</p>
-        <div class="hero__actions">
-          <a class="btn btn--primary" href="#products">Browse products</a>
-          <a class="btn btn--ghost" href="#about">What is SK CORE?</a>
-        </div>
-        <p class="hero__hint">Browse the catalog below. Each product opens on its own independent website.</p>
+  <section class="hero" id="home" aria-labelledby="hero-heading">
+    <div class="hero__copy">
+      <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>An independent digital universe</p>
+      <h1 id="hero-heading">
+        <span class="hero__line"><span>BUILD BEYOND</span></span>
+        <span class="hero__line hero__line--gradient"><span>THE ORDINARY.</span></span>
+      </h1>
+      <p class="hero__sub">Independent products. One ecosystem of possibilities.</p>
+      <p class="hero__desc">Explore SK CORE — a growing collection of digital products built for authentication, software licensing, automation, and modern online experiences.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#products">Explore Products <span class="btn__arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="#about">Discover SK CORE</a>
       </div>
-
-      <aside class="orbit" aria-label="How SK CORE connects to each product">
-        <p class="orbit__title">How this page works</p>
-        <div class="orbit__rows">
-          <div class="orbit__row">
-            <span class="orbit__node">SK AUTH</span>
-            <span class="orbit__arrow" aria-hidden="true">&rarr;</span>
-            <span class="orbit__node">auth.skcore.in</span>
-          </div>
-          <div class="orbit__row">
-            <span class="orbit__node">SK ASSISTANT</span>
-            <span class="orbit__arrow" aria-hidden="true">&rarr;</span>
-            <span class="orbit__node orbit__node--muted">website link pending</span>
-          </div>
-        </div>
-        <p class="orbit__center"><svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false" style="display:inline-block;vertical-align:-4px"><g fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="16" cy="16" r="3.2" fill="currentColor" stroke="none"/><path d="M16 12.8V7M16 19.2V25M12.8 16H7M19.2 16h6" stroke-width="1.7"/></g></svg> Each product keeps its own website, accounts and deployment.</p>
-      </aside>
+      <p class="hero__meta"><span>Static catalog</span><span>No framework</span><span>Independent products</span></p>
     </div>
+    <a class="hero__scroll" href="#products" aria-label="Scroll to products">
+      <span class="hero__scroll-track" aria-hidden="true"><span></span></span>
+      <span class="hero__scroll-label">Scroll to explore</span>
+    </a>
+    <p class="brand-beam"><span>SK CORE</span></p>
   </section>
 
-  <section class="section" id="products" aria-labelledby="products-heading">
-    <div class="container">
-      <div class="section-head">
-        <h2 id="products-heading">Products</h2>
-        <p>Every SK product that is published, in one list. Products with a confirmed website are linked directly; anything still waiting for its address says so instead of sending you to a dead page.</p>
+  <section class="section section--products" id="products" aria-labelledby="products-heading">
+    <div class="container products__inner">
+      <div class="section__head reveal">
+        <p class="eyebrow">The catalog</p>
+        <h2 id="products-heading">Independent products, built beyond the ordinary.</h2>
+        <p class="section__lede">Every listing is a separate product with its own website, accounts, and services. Explore what is available today.</p>
       </div>
-      <section class="product-group" aria-labelledby="group-1">
-        <h3 class="product-group__heading" id="group-1">Authentication and licensing</h3>
-        <div class="product-grid">
-      <article class="product-card" aria-labelledby="product-sk-auth-name">
-        <div class="product-card__head">
-          <span class="product-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true" focusable="false">
+      <div class="product-grid">
+          <article class="product-card reveal product-card--linked" aria-labelledby="product-sk-auth-name">
+            <span class="product-card__orbit" aria-hidden="true"></span>
+            <div class="product-card__head">
+              <span class="product-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true" focusable="false">
   <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <path d="M16 4.5 26 8.4v7.9c0 5.6-4.2 9.9-10 11.2-5.8-1.3-10-5.6-10-11.2V8.4Z" stroke-width="1.8"/>
     <circle cx="16" cy="14.6" r="2.5" stroke-width="1.8"/>
     <path d="M16 17.1v4.6" stroke-width="1.8"/>
   </g>
 </svg></span>
-          <div class="product-card__titles">
-            <h3 class="product-card__name" id="product-sk-auth-name">SK AUTH</h3>
-            <p class="product-card__cat">Authentication and licensing</p>
-          </div>
-          <span class="product-card__badge badge badge--available">Available</span>
-        </div>
-        <p class="product-card__tagline">Authentication and software licensing.</p>
-        <p class="product-card__desc">Account authentication and license-key management for applications, with a sign-in panel and a Discord bot for key operations.</p>
-        <ul class="chips">
-          <li class="chip">Accounts and sessions</li>
-          <li class="chip">Two-factor sign-in</li>
-          <li class="chip">License keys</li>
-        </ul>
-        <div class="product-card__foot">
-          <a class="btn btn--primary btn--block card-link" href="https://auth.skcore.in" target="_blank" rel="noopener noreferrer">Open website<span class="sr-only"> — SK AUTH (opens in a new tab)</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-        </div>
-      </article>
-        </div>
-      </section>
-      <section class="product-group" aria-labelledby="group-2">
-        <h3 class="product-group__heading" id="group-2">Automation</h3>
-        <div class="product-grid">
-      <article class="product-card product-card--unavailable" aria-labelledby="product-sk-assistant-name">
-        <div class="product-card__head">
-          <span class="product-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true" focusable="false">
+              <div class="product-card__titles">
+                <h3 class="product-card__name" id="product-sk-auth-name">SK AUTH</h3>
+                <p class="product-card__cat">Authentication and licensing</p>
+              </div>
+              <span class="product-card__badge badge badge--available">Available</span>
+            </div>
+            <p class="product-card__tagline">Authentication and software licensing.</p>
+            <ul class="chips">
+              <li class="chip">Accounts and sessions</li>
+              <li class="chip">Two-factor sign-in</li>
+              <li class="chip">License keys</li>
+            </ul>
+            <span class="product-card__cta">Open SK AUTH <span aria-hidden="true">→</span></span>
+            <a class="product-card__panel-link" href="https://auth.skcore.in" target="_blank" rel="noopener noreferrer" aria-label="Open SK AUTH website (opens in a new tab)"></a>
+          </article>
+          <article class="product-card reveal product-card--unavailable" aria-labelledby="product-sk-assistant-name">
+            <span class="product-card__orbit" aria-hidden="true"></span>
+            <div class="product-card__head">
+              <span class="product-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true" focusable="false">
   <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <rect x="6" y="11.5" width="20" height="15" rx="4.5" stroke-width="1.8"/>
     <path d="M16 11.5V7.6" stroke-width="1.8"/>
@@ -190,76 +163,84 @@
     <path d="M6 16.5H3.4M26 16.5h2.6" stroke-width="1.8" opacity="0.7"/>
   </g>
 </svg></span>
-          <div class="product-card__titles">
-            <h3 class="product-card__name" id="product-sk-assistant-name">SK ASSISTANT</h3>
-            <p class="product-card__cat">Automation</p>
-          </div>
-          <span class="product-card__badge badge badge--available">Available</span>
-        </div>
-        <p class="product-card__tagline">Discord bot and server automation services.</p>
-        <p class="product-card__desc">A Discord bot that automates server tasks, with an optional OAuth dashboard published by the bot itself.</p>
-        <ul class="chips">
-          <li class="chip">Discord bot</li>
-          <li class="chip">Server automation</li>
-        </ul>
-        <div class="product-card__foot">
-          <span class="btn btn--disabled btn--block" aria-disabled="true">Link unavailable</span>
-          <p class="product-card__note">No production URL is recorded in the SK ASSISTANT project (its deployment documentation still uses a placeholder base URL). This link stays disabled until you supply the real website address.</p>
-        </div>
-      </article>
-        </div>
-      </section>
-    </div>
-  </section>
+              <div class="product-card__titles">
+                <h3 class="product-card__name" id="product-sk-assistant-name">SK ASSISTANT</h3>
+                <p class="product-card__cat">Automation</p>
+              </div>
+              <span class="product-card__badge badge badge--pending">Not available</span>
+            </div>
+            <p class="product-card__tagline">Discord bot and server automation services.</p>
+            <ul class="chips">
+              <li class="chip">Discord bot</li>
+              <li class="chip">Server automation</li>
+            </ul>
+            <span class="product-card__cta product-card__cta--muted">Not available yet</span>
 
-  <section class="section" id="about" aria-labelledby="about-heading">
-    <div class="container about__grid">
-      <div>
-        <h2 id="about-heading">What SK CORE is</h2>
-        <p>SK CORE is a directory, not a platform that stores your data: each SK product keeps running as its own independent website, with its own accounts and its own domain. This page only lists them and links to them.</p>
+          </article>
       </div>
-      <ul class="about__points">
-        <li>One catalog that lists every SK product and where to find it.</li>
-        <li>Each product stays independently deployed and independently operated.</li>
-        <li>New products are registered in a single configuration file, so the catalog grows without a redesign.</li>
-      </ul>
     </div>
   </section>
 
+  <section class="section section--about" id="about" aria-labelledby="about-heading">
+    <div class="container about__grid">
+      <div class="about__intro reveal">
+        <p class="eyebrow">The ecosystem</p>
+        <h2 id="about-heading">About the SK CORE ecosystem</h2>
+        <p>SK CORE brings every product in the SK ecosystem together in one catalog. Each listing explains what the product does, whether it is available, and where to find it. Products remain independent services with their own websites, domains, and accounts.</p>
+      </div>
+      <div class="about__details reveal">
+        <h3>How the catalog works</h3>
+        <ul class="about__points">
+        <li>Discover products, their purpose, availability, and official destination in one place.</li>
+        <li>Products run on their own websites and domains, with their own accounts and services.</li>
+        <li>SK CORE is a directory: product accounts and user data stay with each independent product, not this catalog.</li>
+        <li>The catalog can grow as new products are added, without combining them into one platform.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
+<footer class="site-footer" id="contact">
+  <div class="container site-footer__inner reveal">
+    <div class="site-footer__topline">
+      <p class="eyebrow">Contact</p>
+      <span class="site-footer__rule" aria-hidden="true"></span>
+    </div>
     <div class="site-footer__grid">
       <div>
         <p class="site-footer__brand">
-          <span class="brand__mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true" focusable="false">
-  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3.5" y="3.5" width="25" height="25" rx="7.5" stroke-width="1.7" opacity="0.5"/>
-    <path d="M16 12.6V6.6M16 19.4v6M12.6 16H6.6M19.4 16h6" stroke-width="1.7" opacity="0.75"/>
-    <circle cx="16" cy="16" r="3.2" fill="currentColor" stroke="none"/>
-    <circle cx="16" cy="16" r="6.4" stroke-width="1.4" opacity="0.35"/>
-    <circle cx="16" cy="5.4" r="2.05" fill="currentColor" stroke="none"/>
-    <circle cx="16" cy="26.6" r="2.05" fill="currentColor" stroke="none"/>
-    <circle cx="5.4" cy="16" r="2.05" fill="currentColor" stroke="none"/>
-    <circle cx="26.6" cy="16" r="2.05" fill="currentColor" stroke="none"/>
-  </g>
-</svg></span>
+          <span class="brand__mark" aria-hidden="true"><img src="/assets/icons/sk-core.png" alt="" width="112" height="112"></span>
           <span class="brand__name">SK CORE</span>
         </p>
-        <p class="site-footer__note">SK products are independent websites and independent services.</p>
+        <p class="site-footer__note">For product-specific support, visit that product&#39;s own website. SK CORE is the catalog for the full SK product ecosystem.</p>
       </div>
       <div>
-        <h2>This site</h2>
+        <h2>Explore SK CORE</h2>
         <ul>
+          <li><a href="#home">Home</a></li>
           <li><a href="#products">Products</a></li>
           <li><a href="#about">About</a></li>
         </ul>
       </div>
+      <div>
+        <h2>Products</h2>
+        <ul>
+          <li><a href="#products">SK AUTH</a></li>
+          <li><a href="#products">SK ASSISTANT</a></li>
+        </ul>
+      </div>
     </div>
     <div class="site-footer__bottom">
-      <p>© 2026 SK CORE. All rights reserved.</p>
-      <p>skcore.in</p>
+      <p class="site-footer__developer">Developer: SK</p>
+      <div class="site-footer__socials" aria-label="Social media">
+        <span class="site-footer__social-icon" role="img" aria-label="Instagram" title="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="site-footer__social-dot" cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+        <span class="site-footer__social-icon" role="img" aria-label="Discord" title="Discord">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.7 5.3a18 18 0 0 0-4.4-1.4l-.5 1a16.5 16.5 0 0 0-5.6 0l-.5-1a18 18 0 0 0-4.4 1.4C1.5 9.4.7 13.4 1.1 17.4a18 18 0 0 0 5.4 2.7l1.2-2a11 11 0 0 1-1.9-.9l.5-.4a12.8 12.8 0 0 0 11.4 0l.5.4a11 11 0 0 1-1.9.9l1.2 2a18 18 0 0 0 5.4-2.7c.5-4.6-.8-8.6-3.2-12.1ZM8.8 14.8c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm6.4 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+        </span>
+      </div>
     </div>
   </div>
 </footer>

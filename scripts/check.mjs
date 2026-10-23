@@ -137,7 +137,8 @@ check('SK MAIL is not part of this catalog', !JSON.stringify(config).toLowerCase
 section('Build output');
 const requiredFiles = [
   'index.html', '404.html', 'robots.txt', 'sitemap.xml', 'site.webmanifest',
-  'assets/css/styles.css', 'assets/js/app.js', 'assets/favicon.svg',
+  'assets/css/styles.css', 'assets/js/app.js', 'assets/js/cosmos.js', 'assets/favicon.svg',
+  'assets/icons/sk-core.png',
   'assets/icons/icon-32.png', 'assets/icons/icon-180.png', 'assets/icons/icon-192.png',
   'assets/icons/icon-512.png', 'assets/og/og-image.png',
 ];
@@ -225,15 +226,16 @@ for (const product of products.filter((p) => p.fallbackHref)) {
 }
 
 section('Product cards reflect the configuration');
-// Isolate each card so "no link" can be asserted per product instead of globally.
-const cardBlocks = index.split('<article class="product-card').slice(1);
+// Isolate each complete card so "no link" and "no extra image" can be asserted
+// per product instead of globally (the header and footer also contain images).
+const cardBlocks = [...index.matchAll(/<article class="product-card[\s\S]*?<\/article>/g)].map((match) => match[0]);
 const cardFor = (product) => cardBlocks.find((block) => block.includes(`product-${product.id}-name`)) || '';
 
 for (const product of products) {
   const href = product.href;
   const block = cardFor(product);
   check(`${product.name}: card rendered with an aria-labelledby target`, block !== '' && index.includes(`aria-labelledby="product-${product.id}-name"`));
-  check(`${product.name}: name, tagline and description appear`, block.includes(product.name) && block.includes(product.tagline) && block.includes(product.description));
+    check(`${product.name}: name and tagline appear; long description omitted`, block.includes(product.name) && block.includes(product.tagline) && !block.includes('product-card__desc'));
   if (href) {
     check(`${product.name}: card links to ${href}`, block.includes(`href="${href}"`));
     check(`${product.name}: card link is a safe external link`, /href="https:\/\/[^"]+"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/.test(block));
@@ -241,18 +243,18 @@ for (const product of products) {
     check(`${product.name}: card does not show a disabled action`, !block.includes('Link unavailable'));
   } else {
     check(`${product.name}: card contains no outbound link at all`, !/href="https?:/.test(block) && !block.includes('card-link'), 'unconfigured product must not link anywhere');
-    check(`${product.name}: card action is disabled for assistive tech`, block.includes('aria-disabled="true"') && block.includes('Link unavailable'));
-    check(`${product.name}: card explains why the link is unavailable`, block.includes(product.urlNote));
+    check(`${product.name}: no fake unavailable button is rendered`, !block.includes('Link unavailable') && !block.includes('btn--disabled'));
+    check(`${product.name}: internal URL note is omitted from the card`, !block.includes(product.urlNote));
   }
 }
-check('card icons are inline SVG (no extra requests)', !/<img /.test(index));
+check('card icons are inline SVG (no extra requests)', cardBlocks.every((block) => !/<img /.test(block)));
 
 section('Accessibility');
 check('skip link points at #main', /class="skip-link" href="#main"/.test(index) && index.includes('id="main"'));
 check('header, main, footer and nav landmarks present', /<header\b/.test(index) && /<main\b/.test(index) && /<footer\b/.test(index) && /<nav\b/.test(index));
 check('navigation has an accessible name', /<nav[^>]*aria-label="[^"]+"/.test(index));
 check('menu button exposes aria-expanded', /data-nav-toggle aria-expanded="false"/.test(index));
-check('theme button exposes aria-pressed and a label', /data-theme-toggle aria-pressed="false" aria-label="[^"]+"/.test(index));
+check('theme switch control is removed from the header', !index.includes('data-theme-toggle'));
 check('decorative SVGs are hidden from assistive tech', [...index.matchAll(/<svg\b[^>]*>/g)].every((m) => /aria-hidden="true"/.test(m[0])));
 check('headings are ordered without skips', (() => {
   const levels = [...index.matchAll(/<h([1-4])[\s>]/g)].map((m) => Number(m[1]));
@@ -297,6 +299,12 @@ check('script is small (< 8 KB)', Buffer.byteLength(script, 'utf8') < 8192, `${B
 check('script has no eval or new Function', !/\beval\s*\(|new Function/.test(script));
 check('script does not write to the console', !/console\.(log|debug|info)\(/.test(script));
 check('script does not use document.write', !/document\.write/.test(script));
+
+const cosmosScript = read('assets/js/cosmos.js');
+check('cosmos script is small (< 8 KB)', Buffer.byteLength(cosmosScript, 'utf8') < 8192, `${Buffer.byteLength(cosmosScript, 'utf8')} bytes`);
+check('cosmos script has no eval or new Function', !/\beval\s*\(|new Function/.test(cosmosScript));
+check('cosmos script does not write to the console', !/console\.(log|debug|info)\(/.test(cosmosScript));
+check('cosmos script is referenced by both pages', index.includes('/assets/js/cosmos.js') && notFound.includes('/assets/js/cosmos.js'));
 
 /* ------------------------------------------------------------------ result */
 

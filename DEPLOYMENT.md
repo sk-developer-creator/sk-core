@@ -52,7 +52,7 @@ throughout and answered 200 the whole time.
 | `https://www.skcore.in/` | **301 →** `https://skcore.in/` |
 | TLS | authorised, TLSv1.3, Let's Encrypt (`YR2`), CN `skcore.in`, SAN `skcore.in` + `www.skcore.in`, valid 2026-10-19 → 2027-01-17 |
 | HTTPS enforcement | enabled in Pages (`https_enforced: true`) |
-| Assets | `styles.css`, `app.js`, `favicon.svg`, icons 32/180/512, `og-image.png`, `site.webmanifest` — all HTTP 200 |
+| Assets | `styles.css`, `app.js`, `cosmos.js`, `favicon.svg`, icons 32/180/512, `og-image.png`, `site.webmanifest` — all HTTP 200 |
 | `robots.txt` / `sitemap.xml` | HTTP 200, both cite `https://skcore.in` |
 | Unknown path | **HTTP 404** rendering the custom page ("Page not found — SK CORE") |
 | Console (real browser) | empty — no messages or errors, including after theme switching |
@@ -244,7 +244,7 @@ time:
   `dist/index.html`.
 * Certificate chain valid, issued for `skcore.in`, not expired, and HTTP redirects to HTTPS.
 * SK AUTH card opens `https://auth.skcore.in`; SK ASSISTANT still has no link.
-* All local assets (`/assets/css/styles.css`, `/assets/js/app.js`, icons, `og-image.png`) return 200.
+* All local assets (`/assets/css/styles.css`, `/assets/js/app.js`, `/assets/js/cosmos.js`, icons, `og-image.png`) return 200.
 * An unknown path (e.g. `/no-such-page`) returns **HTTP 404** with the custom 404 page.
 * Mobile (390 px) and desktop (1440 px) layouts, nav, theme switch, keyboard focus.
 * Console clean; no unexpected external requests.

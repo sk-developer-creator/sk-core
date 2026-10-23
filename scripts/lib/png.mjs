@@ -61,6 +61,145 @@ export function encodePng(width, height, rgba) {
   ]);
 }
 
+/* ------------------------------------------------------- read raster input */
+
+/** Decodes an 8-bit, non-interlaced PNG (RGB or RGBA) into RGBA pixels. */
+export function decodePng(buffer) {
+  if (!buffer.subarray(0, 8).equals(PNG_SIGNATURE)) throw new Error('not a PNG');
+
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlace = 0;
+  const idat = [];
+
+  while (offset + 8 <= buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString('latin1', offset + 4, offset + 8);
+    const data = buffer.subarray(offset + 8, offset + 8 + length);
+    offset += 12 + length;
+
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+      interlace = data[12];
+    } else if (type === 'IDAT') {
+      idat.push(data);
+    } else if (type === 'IEND') {
+      break;
+    }
+  }
+
+  if (!width || !height) throw new Error('PNG has no IHDR');
+  if (bitDepth !== 8) throw new Error(`unsupported PNG bit depth ${bitDepth}`);
+  if (interlace !== 0) throw new Error('interlaced PNGs are not supported');
+  if (colorType !== 2 && colorType !== 6) throw new Error(`unsupported PNG colour type ${colorType}`);
+
+  const channels = colorType === 6 ? 4 : 3;
+  const stride = width * channels;
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const out = Buffer.alloc(width * height * 4);
+  let previous = Buffer.alloc(stride);
+
+  for (let y = 0; y < height; y += 1) {
+    const start = y * (stride + 1);
+    const filter = raw[start];
+    const line = Buffer.from(raw.subarray(start + 1, start + 1 + stride));
+
+    for (let i = 0; i < stride; i += 1) {
+      const left = i >= channels ? line[i - channels] : 0;
+      const above = previous[i];
+      const upperLeft = i >= channels ? previous[i - channels] : 0;
+      let value = line[i];
+
+      if (filter === 1) value = (value + left) & 0xff;
+      else if (filter === 2) value = (value + above) & 0xff;
+      else if (filter === 3) value = (value + Math.floor((left + above) / 2)) & 0xff;
+      else if (filter === 4) {
+        const p = left + above - upperLeft;
+        const pa = Math.abs(p - left);
+        const pb = Math.abs(p - above);
+        const pc = Math.abs(p - upperLeft);
+        const predictor = pa <= pb && pa <= pc ? left : (pb <= pc ? above : upperLeft);
+        value = (value + predictor) & 0xff;
+      }
+      line[i] = value;
+    }
+
+    for (let x = 0; x < width; x += 1) {
+      const source = x * channels;
+      const target = (y * width + x) * 4;
+      out[target] = line[source];
+      out[target + 1] = line[source + 1];
+      out[target + 2] = line[source + 2];
+      out[target + 3] = channels === 4 ? line[source + 3] : 255;
+    }
+
+    previous = line;
+  }
+
+  return { width, height, data: out };
+}
+
+/** Draws a decoded image into a canvas rectangle using an alpha-weighted box filter. */
+export function drawImage(canvas, image, x, y, w, h, opacity = 1) {
+  const targetX = Math.round(x);
+  const targetY = Math.round(y);
+  const targetWidth = Math.max(1, Math.round(w));
+  const targetHeight = Math.max(1, Math.round(h));
+  const scaleX = image.width / targetWidth;
+  const scaleY = image.height / targetHeight;
+
+  for (let py = 0; py < targetHeight; py += 1) {
+    const sourceTop = py * scaleY;
+    const sourceBottom = (py + 1) * scaleY;
+    const firstRow = Math.floor(sourceTop);
+    const lastRow = Math.min(image.height, Math.ceil(sourceBottom));
+
+    for (let px = 0; px < targetWidth; px += 1) {
+      const sourceLeft = px * scaleX;
+      const sourceRight = (px + 1) * scaleX;
+      const firstColumn = Math.floor(sourceLeft);
+      const lastColumn = Math.min(image.width, Math.ceil(sourceRight));
+      let red = 0;
+      let green = 0;
+      let blue = 0;
+      let alpha = 0;
+      let weight = 0;
+
+      for (let sy = firstRow; sy < lastRow; sy += 1) {
+        const rowWeight = Math.min(sourceBottom, sy + 1) - Math.max(sourceTop, sy);
+        if (rowWeight <= 0) continue;
+        for (let sx = firstColumn; sx < lastColumn; sx += 1) {
+          const columnWeight = Math.min(sourceRight, sx + 1) - Math.max(sourceLeft, sx);
+          if (columnWeight <= 0) continue;
+          const area = rowWeight * columnWeight;
+          const index = (sy * image.width + sx) * 4;
+          const sourceAlpha = image.data[index + 3] / 255;
+          red += image.data[index] * sourceAlpha * area;
+          green += image.data[index + 1] * sourceAlpha * area;
+          blue += image.data[index + 2] * sourceAlpha * area;
+          alpha += sourceAlpha * area;
+          weight += area;
+        }
+      }
+
+      if (weight <= 0 || alpha <= 0) continue;
+      const outAlpha = Math.min(1, (alpha / weight) * opacity);
+      blend(canvas, targetX + px, targetY + py, [
+        Math.round(red / alpha),
+        Math.round(green / alpha),
+        Math.round(blue / alpha),
+        outAlpha,
+      ]);
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ canvas */
 
 export function createCanvas(width, height) {

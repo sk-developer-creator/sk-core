@@ -19,7 +19,8 @@ src/
   404.template.html       custom not-found page template
 assets/
   css/styles.css          theme tokens + layout (dark default, light switch)
-  js/app.js               theme switch + mobile menu (the only script; ~3 KB)
+  js/app.js               navigation, reveals and card interactions
+  js/cosmos.js            3D particle field and travelling light (canvas)
   favicon.svg             SVG favicon
   icons/*.svg             brand mark, SK AUTH icon, SK ASSISTANT icon (inlined at build)
 scripts/
@@ -37,7 +38,7 @@ uses Node built-ins only. The page requests no external fonts, scripts or images
 
 ```bash
 npm run build    # regenerate dist/ from site.config.json (also builds the PNG icons)
-npm run check    # verify the built site (123 checks) — exits non-zero on any failure
+npm run check    # verify the built site (129 checks) — exits non-zero on any failure
 npm run serve    # preview at http://127.0.0.1:4173 (PORT=8080 npm run serve to change)
 npm test         # build, then check
 ```
@@ -83,8 +84,9 @@ Two extra fields exist for traceability:
   fallback URL ever appears in the built HTML, because the page must only send visitors to
   the primary product URL.
 
-Products sharing a `category` are grouped under one heading; with a single category the
-grouping headings disappear automatically. Nothing in the markup is duplicated by hand.
+Every product is listed in one catalog panel. The grid is responsive: up to three cards
+per row on desktop, two on tablets and one on phones. Nothing in the markup is duplicated
+by hand.
 
 **Never put an unverified URL in `href`.** The brief for this project is explicit about
 this, and `npm run check` rejects placeholder-looking URLs (`example.com`, `localhost`,
@@ -180,8 +182,8 @@ Google), plus HTTP and TLS probes. No changes were made.
 
 ## 7. How SK CORE is deployed (done)
 
-The artefact is a plain static directory: `dist/` (16 files, ~68 KB). No server code, no
-database, no build-time secret.
+The artefact is a plain static directory: `dist/` (17 files, ~73 KB of HTML/CSS/JS plus
+icons and the social preview image). No server code, no database, no build-time secret.
 
 **Deployed 2026-10-19 on GitHub Pages**, from the public repository
 `https://github.com/sk-developer-creator/sk-core`, with `.github/workflows/deploy-pages.yml`

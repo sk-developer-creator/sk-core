@@ -15,7 +15,8 @@ import { fileURLToPath } from 'node:url';
 
 import {
   encodePng, renderScaled, fillRect, fillGradient, fillRoundedRect,
-  strokeRoundedRect, fillCircle, strokeCircle, drawText,
+  strokeRoundedRect, fillCircle, strokeCircle, drawText, createCanvas,
+  decodePng, drawImage,
 } from './lib/png.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -24,15 +25,15 @@ const SRC = path.join(ROOT, 'src');
 const ASSETS = path.join(ROOT, 'assets');
 
 const PALETTE = {
-  bgTop: [11, 18, 32],
-  bgBottom: [13, 24, 44],
-  panel: [16, 27, 46],
-  line: [45, 63, 92],
-  text: [233, 239, 250],
-  muted: [166, 182, 206],
-  brand: [91, 140, 255],
-  brandLight: [143, 178, 255],
-  dark: [11, 18, 32],
+  bgTop: [5, 4, 7],
+  bgBottom: [25, 11, 43],
+  panel: [12, 7, 21],
+  line: [118, 37, 232],
+  text: [248, 245, 255],
+  muted: [170, 161, 185],
+  brand: [168, 85, 255],
+  brandLight: [209, 164, 255],
+  dark: [5, 4, 7],
 };
 
 /* ------------------------------------------------------------- utilities */
@@ -101,24 +102,29 @@ const configuredProducts = products.filter((p) => typeof p.href === 'string' && 
 
 /* ------------------------------------------------------------ page pieces */
 
-const brandMark = inlineIcon('icons/sk-core.svg', 'brand mark');
+/** Reads the brand logo once; every raster asset is derived from this master. */
+const BRAND_LOGO_SOURCE = path.join(ASSETS, 'icons/sk-core.png');
+let brandLogo = null;
+try {
+  brandLogo = decodePng(fs.readFileSync(BRAND_LOGO_SOURCE));
+} catch (error) {
+  fail(`brand logo could not be read from assets/icons/sk-core.png (${error.message})`);
+}
+
+// The logo is generated at 2x the largest on-page size (56 px in the header).
+const brandMark = '<img src="/assets/icons/sk-core.png" alt="" width="112" height="112">';
 const navItemsHtml = (config.navigation || []).map((item) => {
   const external = item.external === true;
   const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
   const suffix = external ? '<span class="sr-only"> (opens in a new tab)</span>' : '';
   return `        <li><a class="nav-link" href="${escapeHtml(item.href)}"${attrs}>${escapeHtml(item.label)}${suffix}</a></li>`;
 }).join('\n');
-
-const orbitRowsHtml = products.map((product) => {
-  const target = typeof product.href === 'string' && product.href
-    ? new URL(product.href).hostname
-    : 'website link pending';
-  const cls = typeof product.href === 'string' && product.href ? 'orbit__node' : 'orbit__node orbit__node--muted';
-  return `          <div class="orbit__row">
-            <span class="orbit__node">${escapeHtml(product.name)}</span>
-            <span class="orbit__arrow" aria-hidden="true">&rarr;</span>
-            <span class="${cls}">${escapeHtml(target)}</span>
-          </div>`;
+const navItems404Html = (config.navigation || []).map((item) => {
+  const external = item.external === true;
+  const href = !external && item.href.startsWith('#') ? `/${item.href}` : item.href;
+  const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
+  const suffix = external ? '<span class="sr-only"> (opens in a new tab)</span>' : '';
+  return `        <li><a class="nav-link" href="${escapeHtml(href)}"${attrs}>${escapeHtml(item.label)}${suffix}</a></li>`;
 }).join('\n');
 
 function renderProductCard(product) {
@@ -126,69 +132,52 @@ function renderProductCard(product) {
   const configured = href !== '';
   const available = product.status === 'available';
   const icon = inlineIcon(product.icon || '', product.name);
-  const badgeLabel = available ? 'Available' : 'Coming soon';
+  const badgeLabel = available ? 'Available' : 'Not available';
   const badgeClass = available ? 'badge--available' : 'badge--pending';
 
   const chips = (product.highlights || []).length
-    ? `\n        <ul class="chips">\n${product.highlights.map((h) => `          <li class="chip">${escapeHtml(h)}</li>`).join('\n')}\n        </ul>`
+    ? `\n            <ul class="chips">\n${product.highlights.map((h) => `              <li class="chip">${escapeHtml(h)}</li>`).join('\n')}\n            </ul>`
     : '';
 
-  const action = configured
-    ? `          <a class="btn btn--primary btn--block card-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">Open website<span class="sr-only"> — ${escapeHtml(product.name)} (opens in a new tab)</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>`
-    : `          <span class="btn btn--disabled btn--block" aria-disabled="true">Link unavailable</span>
-          <p class="product-card__note">${escapeHtml(product.urlNote || 'Destination not configured yet.')}</p>`;
-
-  return `      <article class="product-card${configured ? '' : ' product-card--unavailable'}" aria-labelledby="product-${escapeHtml(product.id)}-name">
-        <div class="product-card__head">
-          <span class="product-card__icon" aria-hidden="true">${icon}</span>
-          <div class="product-card__titles">
-            <h3 class="product-card__name" id="product-${escapeHtml(product.id)}-name">${escapeHtml(product.name)}</h3>
-            <p class="product-card__cat">${escapeHtml(product.category || '')}</p>
-          </div>
-          <span class="product-card__badge badge ${badgeClass}">${badgeLabel}</span>
-        </div>
-        <p class="product-card__tagline">${escapeHtml(product.tagline || '')}</p>
-        <p class="product-card__desc">${escapeHtml(product.description || '')}</p>${chips}
-        <div class="product-card__foot">
-${action}
-        </div>
-      </article>`;
+  const panelLink = configured
+    ? `            <a class="product-card__panel-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(product.name)} website (opens in a new tab)"></a>`
+    : '';
+  const cta = configured
+    ? `<span class="product-card__cta">Open ${escapeHtml(product.name)} <span aria-hidden="true">→</span></span>`
+    : `<span class="product-card__cta product-card__cta--muted">Not available yet</span>`;
+  return `          <article class="product-card reveal${configured ? ' product-card--linked' : ' product-card--unavailable'}" aria-labelledby="product-${escapeHtml(product.id)}-name">
+            <span class="product-card__orbit" aria-hidden="true"></span>
+            <div class="product-card__head">
+              <span class="product-card__icon" aria-hidden="true">${icon}</span>
+              <div class="product-card__titles">
+                <h3 class="product-card__name" id="product-${escapeHtml(product.id)}-name">${escapeHtml(product.name)}</h3>
+                <p class="product-card__cat">${escapeHtml(product.category || '')}</p>
+              </div>
+              <span class="product-card__badge badge ${badgeClass}">${badgeLabel}</span>
+            </div>
+            <p class="product-card__tagline">${escapeHtml(product.tagline || '')}</p>${chips}
+            ${cta}
+${panelLink}
+          </article>`;
 }
 
-function renderProductGroups() {
-  const groups = [];
-  for (const product of products) {
-    const key = product.category || 'Products';
-    let group = groups.find((g) => g.key === key);
-    if (!group) {
-      group = { key, items: [] };
-      groups.push(group);
-    }
-    group.items.push(product);
-  }
-
-  const showHeadings = groups.length > 1;
-
-  return groups.map((group, index) => {
-    const cards = group.items.map(renderProductCard).join('\n');
-    if (!showHeadings) {
-      return `      <div class="product-grid">\n${cards}\n      </div>`;
-    }
-    const slug = `group-${index + 1}`;
-    return `      <section class="product-group" aria-labelledby="${slug}">
-        <h3 class="product-group__heading" id="${slug}">${escapeHtml(group.key)}</h3>
-        <div class="product-grid">
+/** One panel holding every product card; the grid shows three across on desktop. */
+function renderProductPanel() {
+  const cards = products.map(renderProductCard).join('\n');
+  return `      <div class="product-grid">
 ${cards}
-        </div>
-      </section>`;
-  }).join('\n');
+      </div>`;
 }
 
 const footerColumnsHtml = (config.footer?.columns || []).map((column) => `      <div>
         <h2>${escapeHtml(column.heading)}</h2>
         <ul>
-${(column.links || []).map((link) => `          <li><a href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a></li>`).join('\n')}
+${(column.links || []).map((link) => {
+  const href = String(link.href || '');
+  const external = /^https:\/\//i.test(href);
+  const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
+  return `          <li><a href="${escapeHtml(href)}"${attrs}>${escapeHtml(link.label)}</a></li>`;
+}).join('\n')}
         </ul>
       </div>`).join('\n');
 
@@ -230,6 +219,7 @@ if (configuredProducts.length) {
 const tokens = {
   LANG: site.locale || 'en',
   BRAND: escapeHtml(brand),
+  SUBTITLE: escapeHtml(site.subtitle || 'DIGITAL PRODUCT ECOSYSTEM'),
   TITLE: escapeHtml(site.title || brand),
   DESCRIPTION: escapeHtml(site.description || ''),
   CANONICAL: `${origin}/`,
@@ -242,21 +232,20 @@ const tokens = {
   MANIFEST_HREF: '/site.webmanifest',
   CSS_HREF: '/assets/css/styles.css',
   JS_HREF: '/assets/js/app.js',
+  COSMOS_JS_HREF: '/assets/js/cosmos.js',
   HOME_HREF: homeHref,
   BRAND_MARK: brandMark,
-  BRAND_MARK_SMALL: `<svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false" style="display:inline-block;vertical-align:-4px"><g fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="16" cy="16" r="3.2" fill="currentColor" stroke="none"/><path d="M16 12.8V7M16 19.2V25M12.8 16H7M19.2 16h6" stroke-width="1.7"/></g></svg>`,
   NAV_ITEMS: navItemsHtml,
+  NAV_ITEMS_404: navItems404Html,
   HERO_EYEBROW: escapeHtml(hero.eyebrow || ''),
   HERO_HEADLINE: escapeHtml(hero.headline || site.tagline || ''),
+  HERO_LINE_ONE: escapeHtml(String(hero.headline || site.tagline || '').split('\n')[0]),
+  HERO_LINE_TWO: escapeHtml(String(hero.headline || site.tagline || '').split('\n')[1] || ''),
   HERO_SUBHEAD: escapeHtml(hero.subhead || ''),
-  HERO_PRIMARY_LABEL: escapeHtml(hero.primaryCta?.label || 'Products'),
-  HERO_PRIMARY_HREF: escapeHtml(hero.primaryCta?.href || '#products'),
-  HERO_SECONDARY_LABEL: escapeHtml(hero.secondaryCta?.label || 'About'),
-  HERO_SECONDARY_HREF: escapeHtml(hero.secondaryCta?.href || '#about'),
-  HERO_HINT: escapeHtml(hero.hint || 'Browse the catalog below. Each product opens on its own independent website.'),
-  ORBIT_ROWS: orbitRowsHtml,
-  PRODUCTS_INTRO: escapeHtml(`Every SK product that is published, in one list. Products with a confirmed website are linked directly; anything still waiting for its address says so instead of sending you to a dead page.`),
-  PRODUCT_GROUPS: renderProductGroups(),
+  HERO_DESCRIPTION: escapeHtml(hero.description || ''),
+  PRODUCT_COUNT: String(products.length),
+  PAGE_WEIGHT_KB: '0',
+  PRODUCT_PANEL: renderProductPanel(),
   ABOUT_HEADING: escapeHtml(config.about?.heading || 'About'),
   ABOUT_BODY: escapeHtml(config.about?.body || ''),
   ABOUT_POINTS: aboutPointsHtml,
@@ -281,38 +270,19 @@ function render(templateFile) {
   return html;
 }
 
+// Page weight shown on the home page: the real byte size of the shipped HTML,
+// CSS and client script, rounded to the nearest kilobyte. HTML is measured
+// after the first render, then the final page is rendered with the result.
+const shippedPageFiles = [
+  path.join(ASSETS, 'css', 'styles.css'),
+  path.join(ASSETS, 'js', 'app.js'),
+  path.join(ASSETS, 'js', 'cosmos.js'),
+];
+const shippedAssetBytes = shippedPageFiles.reduce((total, file) => total + fs.statSync(file).size, 0);
+const renderedHtmlBytes = Buffer.byteLength(render('index.template.html'), 'utf8');
+tokens.PAGE_WEIGHT_KB = String(Math.round((shippedAssetBytes + renderedHtmlBytes) / 1024));
+
 /* ----------------------------------------------------------------- images */
-
-/** Draws the SK CORE mark: rounded frame, spokes, hub and four nodes. */
-function drawMark(ctx, cx, cy, size, { line, accent }) {
-  const half = size / 2;
-  const scale = size / 32;
-
-  // Frame: outline only (never a filled block).
-  ctx.hollowRrect(cx - half, cy - half, size, size, 7.5 * scale, 1.7 * scale, [line[0], line[1], line[2], 0.5]);
-
-  const spoke = 1.7 * scale;
-  const inner = 3.4 * scale;
-  const outer = 9.4 * scale;
-  for (const [dx, dy, w, h] of [
-    [0, -1, spoke, outer - inner],
-    [0, 1, spoke, outer - inner],
-    [-1, 0, outer - inner, spoke],
-    [1, 0, outer - inner, spoke],
-  ]) {
-    const x = dx === 0 ? cx - w / 2 : cx + (dx > 0 ? inner : -outer);
-    const y = dy === 0 ? cy - h / 2 : cy + (dy > 0 ? inner : -outer);
-    ctx.rect(x, y, w, h, [line[0], line[1], line[2], 0.7]);
-  }
-
-  ctx.scircle(cx, cy, 6.4 * scale, 1.4 * scale, [line[0], line[1], line[2], 0.35]);
-  for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
-    const nx = cx + dx * 10.6 * scale;
-    const ny = cy + dy * 10.6 * scale;
-    ctx.circle(nx, ny, 2.05 * scale, line);
-  }
-  ctx.circle(cx, cy, 3.2 * scale, accent);
-}
 
 function makeContext(canvas, factor) {
   return {
@@ -324,6 +294,7 @@ function makeContext(canvas, factor) {
     gradient: (x, y, w, h, top, bottom) => fillGradient(canvas, x * factor, y * factor, w * factor, h * factor, top, bottom),
     text: (text, x, y, scale, color, tracking = 1) => drawText(canvas, text, x * factor, y * factor, scale * factor, color, tracking),
     textWidth: (text, scale, tracking = 1) => (text.length * 5 * scale + (text.length - 1) * tracking * scale),
+    image: (img, x, y, w, h, opacity = 1) => drawImage(canvas, img, x * factor, y * factor, w * factor, h * factor, opacity),
   };
 }
 
@@ -334,30 +305,59 @@ function buildOgImage() {
     const ctx = makeContext(canvas, 2);
     ctx.gradient(0, 0, width, height, PALETTE.bgTop, PALETTE.bgBottom);
 
-    // Restrained accent wash behind the mark.
-    ctx.circle(1000, 300, 232, [91, 140, 255, 0.07]);
+    // A quiet field of stars.
+    const stars = [
+      [94, 64, 2], [186, 38, 1], [304, 84, 1], [438, 48, 2], [522, 116, 1],
+      [628, 36, 1], [702, 88, 2], [812, 54, 1], [932, 102, 1], [1082, 44, 2],
+      [1136, 152, 1], [56, 202, 1], [382, 158, 1], [1148, 242, 1], [650, 178, 1],
+      [884, 198, 1], [226, 260, 1], [1058, 322, 1], [470, 300, 1], [968, 376, 1]
+    ];
+    stars.forEach(([x, y, r]) => ctx.circle(x, y, r, [248, 245, 255, 0.55]));
 
-    drawMark(ctx, 1000, 300, 250, { line: PALETTE.brandLight, accent: PALETTE.brandLight });
+    // Planetary horizon rising through the lower half of the card.
+    ctx.circle(620, 1006, 572, [25, 11, 43, 0.92]);
+    ctx.scircle(620, 1006, 572, 2, [240, 77, 255, 0.42]);
+    ctx.circle(388, 520, 180, [168, 85, 255, 0.10]);
 
-    ctx.text(hero.eyebrow || 'SK ECOSYSTEM', 80, 112, 4, [166, 182, 206, 1], 2);
+    // Restrained accent wash behind the logo.
+    ctx.circle(1000, 300, 232, [168, 85, 255, 0.09]);
+
+    if (brandLogo) ctx.image(brandLogo, 870, 170, 260, 260);
+
+    ctx.text(hero.eyebrow || 'SK ECOSYSTEM', 80, 112, 4, [209, 164, 255, 0.95], 2);
     ctx.text(brand, 80, 158, 16, PALETTE.text, 2);
     ctx.rect(80, 306, 132, 5, PALETTE.brand);
-    ctx.text(site.tagline || '', 80, 348, 3, [166, 182, 206, 1], 2);
+    ctx.text(site.tagline || '', 80, 348, 3, PALETTE.muted, 2);
 
     const chips = products.filter((p) => p.status === 'available').map((p) => p.name);
     let x = 80;
     for (const chip of chips) {
       const label = chip.toUpperCase();
       const w = label.length * 5 * 3 + 40;
-      ctx.rrect(x, 420, w, 46, 23, [91, 140, 255, 0.14]);
-      ctx.hollowRrect(x, 420, w, 46, 23, 1.5, [91, 140, 255, 0.5]);
-      ctx.text(label, x + 20, 432, 3, [143, 178, 255, 1], 1);
+      ctx.rrect(x, 420, w, 46, 23, [168, 85, 255, 0.16]);
+      ctx.hollowRrect(x, 420, w, 46, 23, 1.5, [209, 164, 255, 0.5]);
+      ctx.text(label, x + 20, 432, 3, [209, 164, 255, 1], 1);
       x += w + 14;
     }
 
-    ctx.text(site.domain || '', 80, 520, 3, [127, 144, 169, 1], 2);
+    ctx.text(site.domain || '', 80, 520, 3, [179, 169, 194, 1], 2);
   });
   return encodePng(width, height, image.data);
+}
+
+/** Header/footer logo: the source badge at 2x its largest on-page size. */
+function buildBrandLogo(size = 112) {
+  const canvas = createCanvas(size, size);
+  if (brandLogo) drawImage(canvas, brandLogo, 0, 0, size, size);
+  return encodePng(size, size, canvas.data);
+}
+
+/** Self-contained favicon: the badge embedded as a data URI. */
+function buildFavicon(size = 64) {
+  const canvas = createCanvas(size, size);
+  if (brandLogo) drawImage(canvas, brandLogo, 0, 0, size, size);
+  const png = encodePng(size, size, canvas.data);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-hidden="true" focusable="false"><image width="${size}" height="${size}" href="data:image/png;base64,${png.toString('base64')}"/></svg>\n`;
 }
 
 function buildIcon(size, options = {}) {
@@ -370,8 +370,8 @@ function buildIcon(size, options = {}) {
     } else {
       ctx.rect(0, 0, size, size, PALETTE.dark);
     }
-    const inset = size * (rounded ? 0.17 : 0.15);
-    drawMark(ctx, size / 2, size / 2, size - inset * 2, { line: PALETTE.brandLight, accent: PALETTE.brandLight });
+    const inset = size * (rounded ? 0.09 : 0.055);
+    if (brandLogo) ctx.image(brandLogo, inset, inset, size - inset * 2, size - inset * 2);
   });
   return encodePng(size, size, image.data);
 }
@@ -422,10 +422,12 @@ written.push(writeFile('site.webmanifest', `${JSON.stringify({
   ],
 }, null, 2)}\n`));
 
-for (const asset of ['css/styles.css', 'js/app.js', 'favicon.svg', 'icons/sk-core.svg', 'icons/sk-auth.svg', 'icons/sk-assistant.svg']) {
+for (const asset of ['css/styles.css', 'js/app.js', 'js/cosmos.js', 'icons/sk-auth.svg', 'icons/sk-assistant.svg']) {
   written.push(copyAsset(asset));
 }
 
+written.push(writeFile('assets/icons/sk-core.png', buildBrandLogo()));
+written.push(writeFile('assets/favicon.svg', buildFavicon()));
 written.push(writeFile('assets/icons/icon-32.png', buildIcon(32)));
 written.push(writeFile('assets/icons/icon-180.png', buildIcon(180, { rounded: false })));
 written.push(writeFile('assets/icons/icon-192.png', buildIcon(192, { rounded: false })));
