@@ -436,7 +436,6 @@ function buildFavicon(size = 64) {
 function buildIcon(size) {
   return renderLogoSquare(size);
 }
-
 /* ------------------------------------------------------------------ build */
 
 fs.rmSync(DIST, { recursive: true, force: true });
