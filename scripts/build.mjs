@@ -228,6 +228,8 @@ const tokens = {
   THEME_COLOR_LIGHT: site.themeColorLight || '#f6f8fb',
   FAVICON_HREF: '/assets/favicon.svg',
   ICON_PNG_HREF: '/assets/icons/icon-32.png',
+  ICON_96_PNG_HREF: '/assets/icons/icon-96.png',
+  SHORTCUT_ICON_HREF: '/favicon.ico',
   APPLE_TOUCH_ICON_HREF: '/assets/icons/icon-180.png',
   MANIFEST_HREF: '/site.webmanifest',
   CSS_HREF: '/assets/css/styles.css',
@@ -345,11 +347,47 @@ function buildOgImage() {
   return encodePng(width, height, image.data);
 }
 
-/** Header/footer logo: the source badge at 2x its largest on-page size. */
-function buildBrandLogo(size = 112) {
+/** The source badge drawn edge to edge at an arbitrary square size. */
+function renderLogoSquare(size) {
   const canvas = createCanvas(size, size);
   if (brandLogo) drawImage(canvas, brandLogo, 0, 0, size, size);
   return encodePng(size, size, canvas.data);
+}
+
+/** Header/footer logo: the source badge at 2x its largest on-page size. */
+function buildBrandLogo(size = 112) {
+  return renderLogoSquare(size);
+}
+
+/**
+ * Root /favicon.ico: an ICO container with PNG frames. Search engines that
+ * look up the implicit root favicon (and every legacy browser) get the badge
+ * at a size they accept, instead of falling back to a generic globe.
+ */
+function buildFaviconIco(sizes = [16, 32, 48, 96]) {
+  const frames = sizes.map((size) => ({ size, png: buildBrandLogo(size) }));
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // 1 = icon
+  header.writeUInt16LE(frames.length, 4);
+
+  let offset = 6 + frames.length * 16;
+  const entries = [];
+  for (const frame of frames) {
+    const entry = Buffer.alloc(16);
+    entry.writeUInt8(frame.size >= 256 ? 0 : frame.size, 0); // width
+    entry.writeUInt8(frame.size >= 256 ? 0 : frame.size, 1); // height
+    entry.writeUInt8(0, 2); // palette size
+    entry.writeUInt8(0, 3); // reserved
+    entry.writeUInt16LE(1, 4); // colour planes
+    entry.writeUInt16LE(32, 6); // bits per pixel
+    entry.writeUInt32LE(frame.png.length, 8);
+    entry.writeUInt32LE(offset, 12);
+    offset += frame.png.length;
+    entries.push(entry);
+  }
+
+  return Buffer.concat([header, ...entries, ...frames.map((frame) => frame.png)]);
 }
 
 /** Self-contained favicon: the badge embedded as a data URI. */
@@ -428,7 +466,9 @@ for (const asset of ['css/styles.css', 'js/app.js', 'js/cosmos.js', 'icons/sk-au
 
 written.push(writeFile('assets/icons/sk-core.png', buildBrandLogo()));
 written.push(writeFile('assets/favicon.svg', buildFavicon()));
+written.push(writeFile('favicon.ico', buildFaviconIco()));
 written.push(writeFile('assets/icons/icon-32.png', buildIcon(32)));
+written.push(writeFile('assets/icons/icon-96.png', buildIcon(96, { rounded: false })));
 written.push(writeFile('assets/icons/icon-180.png', buildIcon(180, { rounded: false })));
 written.push(writeFile('assets/icons/icon-192.png', buildIcon(192, { rounded: false })));
 written.push(writeFile('assets/icons/icon-512.png', buildIcon(512, { rounded: false })));

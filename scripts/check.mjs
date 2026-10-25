@@ -136,10 +136,11 @@ check('SK MAIL is not part of this catalog', !JSON.stringify(config).toLowerCase
 
 section('Build output');
 const requiredFiles = [
-  'index.html', '404.html', 'robots.txt', 'sitemap.xml', 'site.webmanifest',
+  'index.html', '404.html', 'robots.txt', 'sitemap.xml', 'site.webmanifest', 'favicon.ico',
   'assets/css/styles.css', 'assets/js/app.js', 'assets/js/cosmos.js', 'assets/favicon.svg',
   'assets/icons/sk-core.png',
-  'assets/icons/icon-32.png', 'assets/icons/icon-180.png', 'assets/icons/icon-192.png',
+  'assets/icons/icon-32.png', 'assets/icons/icon-96.png', 'assets/icons/icon-180.png',
+  'assets/icons/icon-192.png',
   'assets/icons/icon-512.png', 'assets/og/og-image.png',
 ];
 for (const file of requiredFiles) check(`dist/${file} exists`, exists(file));
@@ -163,6 +164,7 @@ check('og:url matches canonical', index.includes(`<meta property="og:url" conten
 check('og:image is absolute and exists in dist', index.includes(`content="${origin}/assets/og/og-image.png"`) && exists('assets/og/og-image.png'));
 check('twitter card present', /<meta name="twitter:card" content="summary_large_image">/.test(index));
 check('favicon and apple touch icon declared', index.includes('/assets/favicon.svg') && index.includes('/assets/icons/icon-180.png'));
+check('search-engine favicon is a 48px multiple (96x96) and a root .ico', index.includes('/assets/icons/icon-96.png') && index.includes('href="/favicon.ico"'));
 check('manifest declared', index.includes('/site.webmanifest'));
 check('structured data is valid JSON', (() => {
   const match = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(index);
@@ -185,7 +187,7 @@ check('manifest icons exist on disk', (manifest.icons || []).every((icon) => exi
 check('manifest declares a 192 and a 512 icon', (manifest.icons || []).some((i) => i.sizes === '192x192') && (manifest.icons || []).some((i) => i.sizes === '512x512'));
 
 section('Icons are real PNGs with the declared size');
-for (const [file, size] of [['assets/icons/icon-32.png', 32], ['assets/icons/icon-180.png', 180], ['assets/icons/icon-192.png', 192], ['assets/icons/icon-512.png', 512], ['assets/og/og-image.png', 1200]]) {
+for (const [file, size] of [['assets/icons/icon-32.png', 32], ['assets/icons/icon-96.png', 96], ['assets/icons/icon-180.png', 180], ['assets/icons/icon-192.png', 192], ['assets/icons/icon-512.png', 512], ['assets/og/og-image.png', 1200]]) {
   const buffer = fs.readFileSync(path.join(DIST, file));
   const signatureOk = buffer.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
   const width = buffer.readUInt32BE(16);
@@ -193,6 +195,17 @@ for (const [file, size] of [['assets/icons/icon-32.png', 32], ['assets/icons/ico
   const expectedHeight = file.includes('og-image') ? 630 : size;
   check(`${file} is a ${size}x${expectedHeight} PNG`, signatureOk && width === size && height === expectedHeight, `${width}x${height}`);
 }
+
+section('favicon.ico');
+const ico = fs.readFileSync(path.join(DIST, 'favicon.ico'));
+const icoFrames = ico.readUInt16LE(4);
+const icoSizes = [];
+for (let i = 0; i < icoFrames; i += 1) {
+  const entry = 6 + i * 16;
+  icoSizes.push(ico.readUInt8(entry) || 256);
+}
+check('favicon.ico has a valid ICO header', ico.readUInt16LE(0) === 0 && ico.readUInt16LE(2) === 1 && icoFrames > 0, `${icoFrames} frame(s)`);
+check('favicon.ico includes a 48px and a 96px frame', icoSizes.includes(48) && icoSizes.includes(96), icoSizes.join(', '));
 
 section('Links and navigation');
 check('no dead href="#" placeholders', !/href="#"/.test(index) && !/href="#"/.test(notFound));
