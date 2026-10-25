@@ -433,20 +433,8 @@ function buildFavicon(size = 64) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-hidden="true" focusable="false"><image width="${size}" height="${size}" href="data:image/png;base64,${png.toString('base64')}"/></svg>\n`;
 }
 
-function buildIcon(size, options = {}) {
-  const { rounded = true } = options;
-  const factor = Math.max(2, Math.round(1024 / size));
-  const image = renderScaled(size, size, factor, (canvas) => {
-    const ctx = makeContext(canvas, factor);
-    if (rounded) {
-      ctx.rrect(0, 0, size, size, size * 0.22, PALETTE.dark);
-    } else {
-      ctx.rect(0, 0, size, size, PALETTE.dark);
-    }
-    const inset = size * (rounded ? 0.09 : 0.055);
-    if (brandLogo) ctx.image(brandLogo, inset, inset, size - inset * 2, size - inset * 2);
-  });
-  return encodePng(size, size, image.data);
+function buildIcon(size) {
+  return renderLogoSquare(size);
 }
 
 /* ------------------------------------------------------------------ build */
