@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SK CORE — Digital products, built beyond the ordinary</title>
-<meta name="description" content="SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.">
+<title>SK CORE — Official catalog of SK digital products</title>
+<meta name="description" content="Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.">
 <link rel="canonical" href="https://skcore.in/">
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="#050407" data-theme-color-dark="#050407" data-theme-color-light="#050407">
@@ -16,17 +16,18 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SK CORE">
-<meta property="og:title" content="SK CORE — Digital products, built beyond the ordinary">
-<meta property="og:description" content="SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.">
+<meta property="og:title" content="SK CORE — Official catalog of SK digital products">
+<meta property="og:description" content="Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.">
 <meta property="og:url" content="https://skcore.in/">
 <meta property="og:image" content="https://skcore.in/assets/og/og-image.png">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="SK CORE — Build Beyond the Ordinary.">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SK CORE — Digital products, built beyond the ordinary">
-<meta name="twitter:description" content="SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.">
+<meta name="twitter:title" content="SK CORE — Official catalog of SK digital products">
+<meta name="twitter:description" content="Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.">
 <meta name="twitter:image" content="https://skcore.in/assets/og/og-image.png">
 <meta name="twitter:image:alt" content="SK CORE — Build Beyond the Ordinary.">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -40,11 +41,48 @@ document.documentElement.classList.add('js');
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "WebSite",
+      "@type": "Organization",
+      "@id": "https://skcore.in/#organization",
       "name": "SK CORE",
+      "alternateName": "skcore.in",
       "url": "https://skcore.in/",
-      "description": "SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.",
-      "inLanguage": "en"
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://skcore.in/assets/icons/icon-512.png",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://skcore.in/assets/og/og-image.png",
+      "description": "Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.",
+      "sameAs": [
+        "https://github.com/sk-developer-creator"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://skcore.in/#website",
+      "name": "SK CORE",
+      "alternateName": "skcore.in",
+      "url": "https://skcore.in/",
+      "description": "Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://skcore.in/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://skcore.in/#webpage",
+      "url": "https://skcore.in/",
+      "name": "SK CORE — Official catalog of SK digital products",
+      "description": "Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.",
+      "inLanguage": "en",
+      "isPartOf": {
+        "@id": "https://skcore.in/#website"
+      },
+      "about": {
+        "@id": "https://skcore.in/#organization"
+      }
     },
     {
       "@type": "ItemList",
@@ -98,8 +136,8 @@ document.documentElement.classList.add('js');
 <main id="main">
   <section class="hero" id="home" aria-labelledby="hero-heading">
     <div class="hero__copy">
-      <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>An independent digital universe</p>
       <h1 id="hero-heading">
+        <span class="eyebrow hero__eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>SK CORE — An independent digital universe</span>
         <span class="hero__line"><span>BUILD BEYOND</span></span>
         <span class="hero__line hero__line--gradient"><span>THE ORDINARY.</span></span>
       </h1>
@@ -149,7 +187,7 @@ document.documentElement.classList.add('js');
               <li class="chip">License keys</li>
             </ul>
             <span class="product-card__cta">Open SK AUTH <span aria-hidden="true">→</span></span>
-            <a class="product-card__panel-link" href="https://auth.skcore.in" target="_blank" rel="noopener noreferrer" aria-label="Open SK AUTH website (opens in a new tab)"></a>
+            <a class="product-card__panel-link" href="https://auth.skcore.in" target="_blank" rel="noopener noreferrer" aria-label="Open SK AUTH website (opens in a new tab)"><span class="sr-only">Open SK AUTH website</span></a>
           </article>
           <article class="product-card reveal product-card--unavailable" aria-labelledby="product-sk-assistant-name">
             <span class="product-card__orbit" aria-hidden="true"></span>
@@ -188,7 +226,7 @@ document.documentElement.classList.add('js');
       <div class="about__intro reveal">
         <p class="eyebrow">The ecosystem</p>
         <h2 id="about-heading">About the SK CORE ecosystem</h2>
-        <p>SK CORE brings every product in the SK ecosystem together in one catalog. Each listing explains what the product does, whether it is available, and where to find it. Products remain independent services with their own websites, domains, and accounts.</p>
+        <p>SK CORE brings every product in the SK ecosystem together in one catalog. It currently lists SK AUTH for account authentication and software licensing, and SK ASSISTANT for Discord automation. Each listing explains what the product does, whether it is available, and where to find it. Products remain independent services with their own websites, domains, and accounts.</p>
       </div>
       <div class="about__details reveal">
         <h3>How the catalog works</h3>

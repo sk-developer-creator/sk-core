@@ -5,8 +5,11 @@
     "subtitle": "DIGITAL PRODUCT ECOSYSTEM",
     "domain": "skcore.in",
     "origin": "https://skcore.in",
-    "title": "SK CORE — Digital products, built beyond the ordinary",
-    "description": "SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.",
+    "title": "SK CORE — Official catalog of SK digital products",
+    "description": "Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.",
+    "profiles": {
+      "github": "https://github.com/sk-developer-creator"
+    },
     "tagline": "Build Beyond the Ordinary.",
     "themeColorDark": "#050407",
     "themeColorLight": "#050407",
@@ -27,7 +30,7 @@
   },
   "about": {
     "heading": "About the SK CORE ecosystem",
-    "body": "SK CORE brings every product in the SK ecosystem together in one catalog. Each listing explains what the product does, whether it is available, and where to find it. Products remain independent services with their own websites, domains, and accounts.",
+    "body": "SK CORE brings every product in the SK ecosystem together in one catalog. It currently lists SK AUTH for account authentication and software licensing, and SK ASSISTANT for Discord automation. Each listing explains what the product does, whether it is available, and where to find it. Products remain independent services with their own websites, domains, and accounts.",
     "points": [
       "Discover products, their purpose, availability, and official destination in one place.",
       "Products run on their own websites and domains, with their own accounts and services.",

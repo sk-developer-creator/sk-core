@@ -105,6 +105,9 @@ check('site.origin is not a placeholder or loopback', !/example\.com|localhost|1
 check('site.title and site.description are set', !!site.title && !!site.description);
 check('title length is reasonable (<= 70)', String(site.title || '').length <= 70, `${String(site.title || '').length} chars`);
 check('description length is reasonable (<= 165)', String(site.description || '').length <= 165, `${String(site.description || '').length} chars`);
+check('title leads with the brand name', String(site.title || '').startsWith(String(site.brand || 'SK CORE')));
+check('description names the brand', String(site.description || '').includes(String(site.brand || 'SK CORE')));
+check('configured social profiles are https URLs', Object.values(site.profiles || {}).every((url) => /^https:\/\/[^\s]+$/.test(String(url))));
 check('at least one product is configured', products.length >= 1);
 
 const ids = products.map((p) => p.id);
@@ -155,6 +158,8 @@ const notFound = exists('404.html') ? read('404.html') : '';
 section('Metadata and SEO');
 check('index has lang attribute', /<html lang="[a-z-]+"/i.test(index));
 check('exactly one h1 per page', (index.match(/<h1[\s>]/g) || []).length === 1 && (notFound.match(/<h1[\s>]/g) || []).length === 1);
+const h1Text = ((index.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+check('the h1 names the brand', h1Text.includes(String(site.brand || 'SK CORE')), h1Text);
 check('description meta present', /<meta name="description" content="[^"]{20,}"/.test(index));
 check('canonical matches site.origin', index.includes(`<link rel="canonical" href="${origin}/">`), origin);
 check('robots meta allows indexing on the landing page', /<meta name="robots" content="index,follow">/.test(index));
@@ -171,6 +176,21 @@ check('structured data is valid JSON', (() => {
   if (!match) return false;
   try { JSON.parse(match[1]); return true; } catch { return false; }
 })());
+
+section('Structured data');
+const structuredData = (() => {
+  const match = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(index);
+  if (!match) return null;
+  try { return JSON.parse(match[1]); } catch { return null; }
+})();
+const graph = (structuredData && structuredData['@graph']) || [];
+const organization = graph.find((node) => node['@type'] === 'Organization');
+const logoUrl = organization && organization.logo ? String(organization.logo.url) : '';
+check('schema declares an Organization with the brand name and homepage', !!organization && organization.name === site.brand && organization.url === `${origin}/`);
+check('Organization logo is an absolute URL that exists in dist', logoUrl.startsWith(`${origin}/`) && exists(logoUrl.slice(origin.length + 1)), logoUrl);
+check('Organization sameAs entries are https URLs', !organization || !organization.sameAs || organization.sameAs.every((url) => /^https:\/\//.test(url)));
+check('WebSite publisher references the Organization', graph.some((node) => node['@type'] === 'WebSite' && organization && node.publisher && node.publisher['@id'] === organization['@id']));
+check('schema declares the homepage WebPage', graph.some((node) => node['@type'] === 'WebPage' && node.url === `${origin}/`));
 check('no unresolved template tokens', !/\{\{[A-Z0-9_]+\}\}/.test(index) && !/\{\{[A-Z0-9_]+\}\}/.test(notFound));
 
 section('robots.txt and sitemap.xml');

@@ -642,6 +642,14 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .hero__line > span { display: block; white-space: nowrap; }
 
+/* Brand line inside the h1: keeps the eyebrow look while naming the brand in the
+   page's primary heading. */
+.hero__eyebrow {
+  max-width: none;
+  margin-bottom: 1.1rem;
+  text-shadow: none;
+}
+
 .hero__line--gradient > span {
   color: transparent;
   background: linear-gradient(100deg, #d1a4ff 0%, #b47bff 25%, #a855ff 46%, #f04dff 72%, #d1a4ff 100%);
@@ -1078,7 +1086,6 @@ ul { margin: 0; padding: 0; list-style: none; }
   z-index: 4;
   inset: 0;
   border-radius: inherit;
-  font-size: 0;
 }
 .product-card__panel-link:focus-visible { outline: 2px solid var(--brand-strong); outline-offset: -3px; }
 
@@ -1380,7 +1387,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .site-header { animation: header-settle 0.8s 0.1s var(--ease) both; }
   .hero .eyebrow { animation: rise 0.8s 0.25s var(--ease) both; }
   .hero__line > span { animation: hero-line 1s 0.1s var(--ease) both; }
-  .hero__line:nth-child(2) > span { animation-delay: 0.22s; }
+  .hero__line--gradient > span { animation-delay: 0.22s; }
   .hero__sub { animation: rise 0.8s 0.55s var(--ease) both; }
   .hero__desc { animation: rise 0.8s 0.68s var(--ease) both; }
   .hero__actions { animation: rise 0.8s 0.8s var(--ease) both; }

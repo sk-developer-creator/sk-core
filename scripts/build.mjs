@@ -140,7 +140,7 @@ function renderProductCard(product) {
     : '';
 
   const panelLink = configured
-    ? `            <a class="product-card__panel-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(product.name)} website (opens in a new tab)"></a>`
+    ? `            <a class="product-card__panel-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(product.name)} website (opens in a new tab)"><span class="sr-only">Open ${escapeHtml(product.name)} website</span></a>`
     : '';
   const cta = configured
     ? `<span class="product-card__cta">Open ${escapeHtml(product.name)} <span aria-hidden="true">→</span></span>`
@@ -193,13 +193,48 @@ const hero = config.hero || {};
 const navigation = config.navigation || [];
 const homeHref = '/';
 
+const profiles = Object.values(site.profiles || {}).filter((url) => /^https:\/\/[^\s]+$/.test(String(url)));
+
+const organizationId = `${origin}/#organization`;
+const websiteId = `${origin}/#website`;
+const webpageId = `${origin}/#webpage`;
+
 const jsonLdGraph = [
   {
-    '@type': 'WebSite',
+    '@type': 'Organization',
+    '@id': organizationId,
     name: brand,
+    alternateName: site.domain || brand,
+    url: `${origin}/`,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${origin}/assets/icons/icon-512.png`,
+      width: 512,
+      height: 512,
+    },
+    image: `${origin}/assets/og/og-image.png`,
+    description: site.description,
+    ...(profiles.length ? { sameAs: profiles } : {}),
+  },
+  {
+    '@type': 'WebSite',
+    '@id': websiteId,
+    name: brand,
+    alternateName: site.domain || brand,
     url: `${origin}/`,
     description: site.description,
     inLanguage: site.locale || 'en',
+    publisher: { '@id': organizationId },
+  },
+  {
+    '@type': 'WebPage',
+    '@id': webpageId,
+    url: `${origin}/`,
+    name: site.title || brand,
+    description: site.description,
+    inLanguage: site.locale || 'en',
+    isPartOf: { '@id': websiteId },
+    about: { '@id': organizationId },
   },
 ];
 if (configuredProducts.length) {

@@ -1,7 +1,7 @@
 {
   "name": "SK CORE",
   "short_name": "SK CORE",
-  "description": "SK CORE is the catalog for independent digital products built for authentication, licensing, automation, and modern online experiences.",
+  "description": "Official SK CORE catalog: SK AUTH for authentication and software licensing, SK ASSISTANT for Discord automation. Open every SK product from one page.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
