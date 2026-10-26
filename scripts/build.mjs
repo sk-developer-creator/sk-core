@@ -111,6 +111,22 @@ try {
   fail(`brand logo could not be read from assets/icons/sk-core.png (${error.message})`);
 }
 
+/** Flattens source transparency onto pure black before any favicon resizing. */
+function compositeOnBlack(image) {
+  if (!image) return null;
+  const data = Buffer.alloc(image.data.length);
+  for (let i = 0; i < image.data.length; i += 4) {
+    const alpha = image.data[i + 3] / 255;
+    data[i] = Math.round(image.data[i] * alpha);
+    data[i + 1] = Math.round(image.data[i + 1] * alpha);
+    data[i + 2] = Math.round(image.data[i + 2] * alpha);
+    data[i + 3] = 255;
+  }
+  return { width: image.width, height: image.height, data };
+}
+
+const faviconLogo = compositeOnBlack(brandLogo);
+
 // The logo is generated at 2x the largest on-page size (56 px in the header).
 const brandMark = '<img src="/assets/icons/sk-core.png" alt="" width="112" height="112">';
 const navItemsHtml = (config.navigation || []).map((item) => {
@@ -383,7 +399,8 @@ function buildOgImage() {
 /** The source badge drawn edge to edge at an arbitrary square size. */
 function renderLogoSquare(size) {
   const canvas = createCanvas(size, size);
-  if (brandLogo) drawImage(canvas, brandLogo, 0, 0, size, size);
+  fillRect(canvas, 0, 0, size, size, [0, 0, 0, 1]);
+  if (faviconLogo) drawImage(canvas, faviconLogo, 0, 0, size, size);
   return encodePng(size, size, canvas.data);
 }
 
@@ -425,9 +442,7 @@ function buildFaviconIco(sizes = [16, 32, 48, 96]) {
 
 /** Self-contained favicon: the badge embedded as a data URI. */
 function buildFavicon(size = 64) {
-  const canvas = createCanvas(size, size);
-  if (brandLogo) drawImage(canvas, brandLogo, 0, 0, size, size);
-  const png = encodePng(size, size, canvas.data);
+  const png = renderLogoSquare(size);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-hidden="true" focusable="false"><image width="${size}" height="${size}" href="data:image/png;base64,${png.toString('base64')}"/></svg>\n`;
 }
 
