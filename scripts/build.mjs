@@ -446,10 +446,9 @@ function buildFavicon(size = 64) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-hidden="true" focusable="false"><image width="${size}" height="${size}" href="data:image/png;base64,${png.toString('base64')}"/></svg>\n`;
 }
 
-function buildIcon(size, options = {}) {
+function buildIcon(size) {
   return renderLogoSquare(size);
 }
-
 /* ------------------------------------------------------------------ build */
 
 fs.rmSync(DIST, { recursive: true, force: true });
@@ -505,10 +504,10 @@ written.push(writeFile('assets/favicon.svg', buildFavicon()));
 written.push(writeFile('favicon.ico', buildFaviconIco()));
 written.push(writeFile('favicon.png', buildIcon(96)));
 written.push(writeFile('assets/icons/icon-32.png', buildIcon(32)));
-written.push(writeFile('assets/icons/icon-96.png', buildIcon(96, { rounded: false })));
-written.push(writeFile('assets/icons/icon-180.png', buildIcon(180, { rounded: false })));
-written.push(writeFile('assets/icons/icon-192.png', buildIcon(192, { rounded: false })));
-written.push(writeFile('assets/icons/icon-512.png', buildIcon(512, { rounded: false })));
+written.push(writeFile('assets/icons/icon-96.png', buildIcon(96)));
+written.push(writeFile('assets/icons/icon-180.png', buildIcon(180)));
+written.push(writeFile('assets/icons/icon-192.png', buildIcon(192)));
+written.push(writeFile('assets/icons/icon-512.png', buildIcon(512)));
 written.push(writeFile('assets/og/og-image.png', buildOgImage()));
 
 /* ----------------------------------------------------------------- report */
