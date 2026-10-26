@@ -261,9 +261,7 @@ const tokens = {
   OG_LOCALE: (site.locale || 'en') === 'en' ? 'en_US' : (site.locale || 'en'),
   THEME_COLOR_DARK: site.themeColorDark || '#0b1220',
   THEME_COLOR_LIGHT: site.themeColorLight || '#f6f8fb',
-  FAVICON_HREF: '/assets/favicon.svg',
-  ICON_PNG_HREF: '/assets/icons/icon-32.png',
-  ICON_96_PNG_HREF: '/assets/icons/icon-96.png',
+  FAVICON_PNG_HREF: '/favicon.png',
   SHORTCUT_ICON_HREF: '/favicon.ico',
   APPLE_TOUCH_ICON_HREF: '/assets/icons/icon-180.png',
   MANIFEST_HREF: '/site.webmanifest',
@@ -434,19 +432,7 @@ function buildFavicon(size = 64) {
 }
 
 function buildIcon(size, options = {}) {
-  const { rounded = true } = options;
-  const factor = Math.max(2, Math.round(1024 / size));
-  const image = renderScaled(size, size, factor, (canvas) => {
-    const ctx = makeContext(canvas, factor);
-    if (rounded) {
-      ctx.rrect(0, 0, size, size, size * 0.22, PALETTE.dark);
-    } else {
-      ctx.rect(0, 0, size, size, PALETTE.dark);
-    }
-    const inset = size * (rounded ? 0.09 : 0.055);
-    if (brandLogo) ctx.image(brandLogo, inset, inset, size - inset * 2, size - inset * 2);
-  });
-  return encodePng(size, size, image.data);
+  return renderLogoSquare(size);
 }
 
 /* ------------------------------------------------------------------ build */
@@ -502,6 +488,7 @@ for (const asset of ['css/styles.css', 'js/app.js', 'js/cosmos.js', 'icons/sk-au
 written.push(writeFile('assets/icons/sk-core.png', buildBrandLogo()));
 written.push(writeFile('assets/favicon.svg', buildFavicon()));
 written.push(writeFile('favicon.ico', buildFaviconIco()));
+written.push(writeFile('favicon.png', buildIcon(96)));
 written.push(writeFile('assets/icons/icon-32.png', buildIcon(32)));
 written.push(writeFile('assets/icons/icon-96.png', buildIcon(96, { rounded: false })));
 written.push(writeFile('assets/icons/icon-180.png', buildIcon(180, { rounded: false })));
