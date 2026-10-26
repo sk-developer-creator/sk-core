@@ -139,7 +139,7 @@ check('SK MAIL is not part of this catalog', !JSON.stringify(config).toLowerCase
 
 section('Build output');
 const requiredFiles = [
-  'index.html', '404.html', 'robots.txt', 'sitemap.xml', 'site.webmanifest', 'favicon.ico',
+  'index.html', '404.html', 'robots.txt', 'sitemap.xml', 'site.webmanifest', 'favicon.ico', 'favicon.png',
   'assets/css/styles.css', 'assets/js/app.js', 'assets/js/cosmos.js', 'assets/favicon.svg',
   'assets/icons/sk-core.png',
   'assets/icons/icon-32.png', 'assets/icons/icon-96.png', 'assets/icons/icon-180.png',
@@ -168,8 +168,8 @@ check('og:title, og:description, og:type present', /og:title/.test(index) && /og
 check('og:url matches canonical', index.includes(`<meta property="og:url" content="${origin}/">`));
 check('og:image is absolute and exists in dist', index.includes(`content="${origin}/assets/og/og-image.png"`) && exists('assets/og/og-image.png'));
 check('twitter card present', /<meta name="twitter:card" content="summary_large_image">/.test(index));
-check('favicon and apple touch icon declared', index.includes('/assets/favicon.svg') && index.includes('/assets/icons/icon-180.png'));
-check('search-engine favicon is a 48px multiple (96x96) and a root .ico', index.includes('/assets/icons/icon-96.png') && index.includes('href="/favicon.ico"'));
+check('brand PNG favicon, root ICO and apple touch icon declared', index.includes('href="/favicon.png"') && index.includes('href="/favicon.ico"') && index.includes('/assets/icons/icon-180.png'));
+check('search-engine favicon is a 48px multiple (96x96) and a root .ico', index.includes('sizes="96x96"') && index.includes('href="/favicon.ico"'));
 check('manifest declared', index.includes('/site.webmanifest'));
 check('structured data is valid JSON', (() => {
   const match = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(index);
